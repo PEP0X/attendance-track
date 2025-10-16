@@ -7,7 +7,7 @@ import { Edit, Trash2, Phone, FileText } from "lucide-react"
 interface Member {
   id: string
   name: string
-  phone: string | null
+  phones: string[] | null
   notes: string | null
 }
 
@@ -24,10 +24,12 @@ export function StudentCard({ member, onEdit, onDelete }: StudentCardProps) {
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1 space-y-2">
             <h3 className="font-semibold text-lg text-gray-900">{member.name}</h3>
-            {member.phone && (
-              <div className="flex items-center gap-2 text-sm text-gray-600">
+            {member.phones && member.phones.length > 0 && (
+              <div className="flex items-center gap-2 text-sm text-gray-600 flex-wrap">
                 <Phone className="h-4 w-4" />
-                <span>{member.phone}</span>
+                {member.phones.map((p, i) => (
+                  <span key={i} className="mr-2">{p}</span>
+                ))}
               </div>
             )}
             {member.notes && (

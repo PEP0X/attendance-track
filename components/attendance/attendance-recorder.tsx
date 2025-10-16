@@ -16,7 +16,7 @@ import { cn } from "@/lib/utils"
 interface Member {
   id: string
   name: string
-  phone: string | null
+  phones: string[] | null
   notes: string | null
 }
 
@@ -480,7 +480,9 @@ export function AttendanceRecorder() {
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1">
                       <h3 className="font-semibold text-lg text-gray-900">{member.name}</h3>
-                      {member.phone && <p className="text-sm text-gray-600 mt-1">{member.phone}</p>}
+                      {member.phones && member.phones.length > 0 && (
+                        <p className="text-sm text-gray-600 mt-1">{member.phones.join(" · ")}</p>
+                      )}
                       {member.notes && <p className="text-sm text-gray-500 mt-1">{member.notes}</p>}
                     </div>
 

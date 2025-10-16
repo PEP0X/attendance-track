@@ -14,7 +14,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 interface Member {
   id: string
   name: string
-  phone: string | null
+  phones: string[] | null
   notes: string | null
 }
 
@@ -70,7 +70,7 @@ export function StudentManagement() {
     }
   }
 
-  const handleSave = async (data: Omit<Member, "id">) => {
+  const handleSave = async (data: { name: string; phones: string[] | null; notes: string | null }) => {
     try {
       if (editingMember) {
         // Update existing member

@@ -9,7 +9,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 
 interface Member {
   name: string
-  phone: string | null
+  phones: string[] | null
   notes: string | null
 }
 
@@ -39,11 +39,13 @@ export function BulkImportDialog({ open, onOpenChange, onImport }: BulkImportDia
 
       const members: Member[] = lines.map((line) => {
         const parts = line.split(",").map((p) => p.trim())
-        return {
-          name: parts[0] || "",
-          phone: parts[1] || null,
-          notes: parts[2] || null,
-        }
+        const name = parts[0] || ""
+        const phones = (parts[1] || "")
+          .split(/[;|]/) // allow multiple numbers separated by ; or |
+          .map((p) => p.trim())
+          .filter((p) => p.length > 0)
+        const notes = parts[2] || null
+        return { name, phones: phones.length ? phones : null, notes }
       })
 
       // Validate that all members have names
@@ -66,7 +68,7 @@ export function BulkImportDialog({ open, onOpenChange, onImport }: BulkImportDia
         <DialogHeader>
           <DialogTitle className="text-gray-900">استيراد طلاب</DialogTitle>
           <DialogDescription className="text-gray-600">
-            أدخل بيانات الطلاب، كل طالب في سطر منفصل بالصيغة: الاسم، رقم الهاتف، ملاحظات
+            أدخل بيانات الطلاب، كل طالب في سطر منفصل بالصيغة: الاسم، أرقام الهاتف (افصل بين الأرقام بـ ; )، ملاحظات
           </DialogDescription>
         </DialogHeader>
 
@@ -77,7 +79,7 @@ export function BulkImportDialog({ open, onOpenChange, onImport }: BulkImportDia
               id="import-text"
               value={text}
               onChange={(e) => setText(e.target.value)}
-              placeholder="مارك جرجس، 01234567890، طالب نشيط&#10;مينا عادل، 01234567891&#10;كيرلس مجدي، 01234567892، يحتاج متابعة"
+              placeholder="مارك جرجس، 01234567890; 01000000000، طالب نشيط&#10;مينا عادل، 01234567891&#10;كيرلس مجدي، 01234567892; 01500000000، يحتاج متابعة"
               rows={10}
               className="font-mono text-sm"
             />
@@ -93,11 +95,11 @@ export function BulkImportDialog({ open, onOpenChange, onImport }: BulkImportDia
             <AlertDescription>
               <strong>مثال:</strong>
               <br />
-              مارك جرجس، 01234567890، طالب نشيط
+              مارك جرجس، 01234567890; 01000000000، طالب نشيط
               <br />
               مينا عادل، 01234567891
               <br />
-              كيرلس مجدي، 01234567892، يحتاج متابعة
+              كيرلس مجدي، 01234567892; 01500000000، يحتاج متابعة
             </AlertDescription>
           </Alert>
 

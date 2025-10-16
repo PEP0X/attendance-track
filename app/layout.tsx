@@ -12,7 +12,20 @@ const ibmPlexArabic = IBM_Plex_Sans_Arabic({
 export const metadata: Metadata = {
   title: "Level Two - نظام إدارة الحضور",
   description: "نظام إدارة حضور اجتماع الجمعة الأسبوعي",
-    generator: 'v0.app'
+  icons: {
+    icon: [
+      { url: '/favicon.ico', sizes: 'any' },
+      { url: '/logo.ico', sizes: 'any' },
+    ],
+    apple: '/logo.ico',
+    shortcut: '/logo.ico',
+  },
+  manifest: '/manifest.json',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: 'Level Two',
+  },
 }
 
 export default function RootLayout({

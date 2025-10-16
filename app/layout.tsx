@@ -2,6 +2,7 @@ import type React from "react"
 import type { Metadata } from "next"
 import { IBM_Plex_Sans_Arabic } from "next/font/google"
 import "./globals.css"
+import PWARegister from "../components/pwa-register"
 
 const ibmPlexArabic = IBM_Plex_Sans_Arabic({
   subsets: ["arabic"],
@@ -35,7 +36,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="ar" dir="rtl" className={ibmPlexArabic.variable}>
-      <body className="antialiased">{children}</body>
+      <body className="antialiased">
+        <PWARegister />
+        {children}
+      </body>
     </html>
   )
 }

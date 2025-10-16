@@ -63,23 +63,33 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="bg-blue-600 border-b border-blue-700 sticky top-0 z-40 shadow-md">
-        <div className="flex items-center justify-between px-4 py-4 lg:px-6">
-          <div className="flex items-center gap-4">
+      <header className="bg-blue-600 border-b border-blue-700 sticky top-0 z-40 shadow-md w-full">
+        <div className="flex flex-wrap items-center justify-between px-2 py-3 sm:px-4 lg:px-6 gap-y-2">
+          <div className="flex items-center gap-2 sm:gap-4 flex-shrink min-w-0">
             <Button
               variant="ghost"
               size="icon"
               className="lg:hidden text-white hover:bg-blue-700"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              aria-label={mobileMenuOpen ? "إغلاق القائمة" : "فتح القائمة"}
             >
               {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </Button>
-            <h1 className="text-xl font-bold text-white">مستوى الثاني (رابعة وخامسة وسادسة) </h1>
+            <h1 className="text-base xs:text-lg sm:text-xl font-bold text-white whitespace-nowrap truncate max-w-[55vw] xs:max-w-[70vw] sm:max-w-[200px] md:max-w-[350px]">
+              مستوى الثاني (رابعة وخامسة وسادسة)
+            </h1>
           </div>
-          <Button variant="ghost" size="sm" onClick={handleLogout} className="text-white hover:bg-blue-700">
-            <LogOut className="h-4 w-4 ml-2" />
-            تسجيل الخروج
-          </Button>
+          <div className="flex-shrink-0 w-full flex justify-end lg:justify-end lg:w-auto mt-2 lg:mt-0">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleLogout}
+              className="text-white hover:bg-blue-700 w-full sm:w-auto"
+            >
+              <LogOut className="h-4 w-4 ml-2" />
+              <span className="truncate">تسجيل الخروج</span>
+            </Button>
+          </div>
         </div>
       </header>
 

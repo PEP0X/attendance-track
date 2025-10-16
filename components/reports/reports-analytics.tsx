@@ -11,7 +11,6 @@ import { Download, Calendar, TrendingUp, Users, CheckCircle2, XCircle } from "lu
 import dynamic from "next/dynamic"
 const AttendanceChart = dynamic(() => import("./attendance-chart").then(m => m.AttendanceChart), { ssr: false })
 const StudentAttendanceTable = dynamic(() => import("./student-attendance-table").then(m => m.StudentAttendanceTable), { ssr: false })
-import DatePickerModal from "@/components/ui/date-picker-modal"
 
 interface AttendanceRecord {
   id: string
@@ -161,11 +160,23 @@ export function ReportsAnalytics() {
           <div className="grid gap-4 md:grid-cols-3">
             <div className="space-y-2">
               <Label htmlFor="start-date">من تاريخ</Label>
-              <DatePickerModal value={startDate} onChange={setStartDate} label="من تاريخ" />
+              <Input
+                id="start-date"
+                type="date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                className="w-full"
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="end-date">إلى تاريخ</Label>
-              <DatePickerModal value={endDate} onChange={setEndDate} label="إلى تاريخ" />
+              <Input
+                id="end-date"
+                type="date"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                className="w-full"
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="student">الطالب</Label>

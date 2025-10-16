@@ -73,13 +73,17 @@ export default function LoginPage() {
   return (
     <>
       <WelcomeModal isOpen={showWelcome} onClose={() => setShowWelcome(false)} userName={userName} />
-      <div className="min-h-screen flex items-center justify-center bg-blue-50 p-4">
+      <div className="min-h-screen flex items-center justify-center bg-blue-50 p-3 sm:p-4 overflow-x-hidden">
         <Card className="w-full max-w-md shadow-lg border border-blue-200">
-          <CardHeader className="space-y-2 text-center bg-blue-600 text-white rounded-t-lg pb-6">
-            <CardTitle className="text-2xl font-bold pt-3">مدرسة الأرشيدياكون حبيب جرجس </CardTitle>
-            <CardDescription className="text-lg text-blue-50 font-medium">نظام إدارة الحضور</CardDescription>
+          <CardHeader className="space-y-2 text-center bg-blue-600 text-white rounded-t-lg pb-4 sm:pb-6 px-3 sm:px-6">
+            <CardTitle className="text-lg sm:text-xl md:text-2xl font-bold pt-2 sm:pt-3 leading-tight break-words">
+              مدرسة الأرشيدياكون حبيب جرجس
+            </CardTitle>
+            <CardDescription className="text-sm sm:text-base md:text-lg text-blue-50 font-medium">
+              نظام إدارة الحضور
+            </CardDescription>
           </CardHeader>
-        <CardContent>
+        <CardContent className="p-4 sm:p-6">
           <form onSubmit={handleLogin} className="space-y-4">
             {error && (
               <Alert variant="destructive">
@@ -88,7 +92,7 @@ export default function LoginPage() {
             )}
 
             <div className="space-y-2">
-              <Label htmlFor="email">البريد الإلكتروني</Label>
+              <Label htmlFor="email" className="text-sm sm:text-base">البريد الإلكتروني</Label>
               <Input
                 id="email"
                 type="email"
@@ -97,12 +101,12 @@ export default function LoginPage() {
                 placeholder="servant@example.com"
                 required
                 disabled={loading}
-                className="text-right"
+                className="text-right h-10 sm:h-auto text-sm sm:text-base"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password">كلمة المرور</Label>
+              <Label htmlFor="password" className="text-sm sm:text-base">كلمة المرور</Label>
               <Input
                 id="password"
                 type="password"
@@ -111,20 +115,18 @@ export default function LoginPage() {
                 placeholder="••••••••"
                 required
                 disabled={loading}
-                className="text-right"
+                className="text-right h-10 sm:h-auto text-sm sm:text-base"
               />
             </div>
 
-            <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold" disabled={loading}>
+            <Button 
+              type="submit" 
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold h-11 sm:h-10 text-sm sm:text-base" 
+              disabled={loading}
+            >
               {loading ? "جاري تسجيل الدخول..." : "تسجيل الدخول"}
             </Button>
 
-            <div className="text-center text-sm text-muted-foreground mt-4">
-              ليس لديك حساب؟{" "}
-              <a href="/signup" className="text-blue-600 hover:text-blue-700 hover:underline font-medium">
-                إنشاء حساب جديد
-              </a>
-            </div>
           </form>
         </CardContent>
       </Card>

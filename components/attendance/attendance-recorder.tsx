@@ -5,7 +5,6 @@ import { getSupabaseBrowserClient } from "@/lib/supabase/client"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import DatePickerModal from "@/components/ui/date-picker-modal"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Alert, AlertDescription } from "@/components/ui/alert"
@@ -384,74 +383,79 @@ export function AttendanceRecorder() {
   }
 
   return (
-    <div className="space-y-6">
+    <div>
       {/* Date Selection and Stats */}
-      <Card>
-        <CardContent className="p-6">
-          <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
-            <div className="flex items-center gap-3 flex-1">
-              <Calendar className="h-5 w-5 text-blue-600" />
+      <Card className="mb-6">
+        <CardContent className="p-4 sm:p-6">
+          <div className="flex flex-col gap-4">
+            {/* Date Picker */}
+            <div className="flex items-center gap-3">
+              <Calendar className="h-5 w-5 text-blue-600 flex-shrink-0" />
               <div className="flex-1">
                 <Label htmlFor="date" className="text-sm text-gray-600">
                   تاريخ الاجتماع
                 </Label>
-                <div className="mt-1">
-                  <DatePickerModal
-                    value={selectedDate}
-                    onChange={(v) => setSelectedDate(v)}
-                    label="تاريخ الاجتماع"
-                  />
-                </div>
+                <Input
+                  id="date"
+                  type="date"
+                  value={selectedDate}
+                  onChange={(e) => setSelectedDate(e.target.value)}
+                  className="mt-1 w-full"
+                />
               </div>
             </div>
 
-            <div className="flex gap-4">
+            {/* Stats - Responsive Grid */}
+            <div className="grid grid-cols-3 gap-2 sm:gap-4 pt-2 border-t border-gray-200">
               <div className="text-center">
-                <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
-                <p className="text-sm text-gray-600">إجمالي الطلاب</p>
+                <p className="text-xl sm:text-2xl font-bold text-gray-900">{stats.total}</p>
+                <p className="text-xs sm:text-sm text-gray-600">إجمالي الطلاب</p>
               </div>
               <div className="text-center">
-                <p className="text-2xl font-bold text-green-600">{stats.present}</p>
-                <p className="text-sm text-gray-600">حاضر</p>
+                <p className="text-xl sm:text-2xl font-bold text-green-600">{stats.present}</p>
+                <p className="text-xs sm:text-sm text-gray-600">حاضر</p>
               </div>
               <div className="text-center">
-                <p className="text-2xl font-bold text-red-600">{stats.absent}</p>
-                <p className="text-sm text-gray-600">غائب</p>
+                <p className="text-xl sm:text-2xl font-bold text-red-600">{stats.absent}</p>
+                <p className="text-xs sm:text-sm text-gray-600">غائب</p>
               </div>
             </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* Search + Bulk actions */}
-      <Card>
-        <CardContent className="p-4 space-y-3">
-          <div className="relative">
-            <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-            <Input
-              placeholder="ابحث عن طالب..."
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
-              className="pr-10"
-            />
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <Button variant="outline" size="sm" onClick={() => bulkMark("present")}>
-              كله حاضر
-            </Button>
-            <Button variant="outline" size="sm" onClick={() => bulkMark("absent")}>
-                كله غائب
-            </Button>
-            <Button variant="outline" size="sm" onClick={bulkReset}>
-              إعادة التعيين للكل
-            </Button>
-            <Button variant="outline" size="sm" onClick={markUnselectedAsAbsent}>
-الباقي غائبين
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-
+      {/* Search + Bulk actions - Sticky on Mobile */}
+      <div className="sticky top-[88px] sm:top-[57px] lg:top-[57px] z-30 bg-gray-50 py-3 -mx-4 px-4 lg:-mx-6 lg:px-6 mb-3">
+        <Card className="shadow-md">
+          <CardContent className="p-4 space-y-3">
+            <div className="relative">
+              <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Input
+                placeholder="ابحث عن طالب..."
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                className="pr-10"
+              />
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Button variant="outline" size="sm" onClick={() => bulkMark("present")}>
+                كله حاضر
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => bulkMark("absent")}>
+                  كله غائب
+              </Button>
+              <Button variant="outline" size="sm" onClick={bulkReset}>
+                إعادة التعيين للكل
+              </Button>
+              <Button variant="outline" size="sm" onClick={markUnselectedAsAbsent}>
+  الباقي غائبين
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+      
+      <div className="space-y-6">
       {/* Message */}
       {message && (
         <Alert variant={message.type === "error" ? "destructive" : "default"}>
@@ -475,35 +479,35 @@ export function AttendanceRecorder() {
 
           return (
             <Card key={member.id}>
-              <CardContent className="p-4">
-                <div className="space-y-4">
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-lg text-gray-900">{member.name}</h3>
+              <CardContent className="p-3 sm:p-4">
+                <div className="space-y-3 sm:space-y-4">
+                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-semibold text-base sm:text-lg text-gray-900 break-words">{member.name}</h3>
                       {member.phones && member.phones.length > 0 && (
-                        <p className="text-sm text-gray-600 mt-1">{member.phones.join(" · ")}</p>
+                        <p className="text-xs sm:text-sm text-gray-600 mt-1 break-all">{member.phones.join(" · ")}</p>
                       )}
-                      {member.notes && <p className="text-sm text-gray-500 mt-1">{member.notes}</p>}
+                      {member.notes && <p className="text-xs sm:text-sm text-gray-500 mt-1">{member.notes}</p>}
                     </div>
 
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 flex-shrink-0">
                       <Button
                         variant={isPresent ? "default" : "outline"}
                         size="sm"
                         onClick={() => toggleAttendance(member.id, "present")}
-                        className={cn("gap-2", isPresent && "bg-green-600 hover:bg-green-700")}
+                        className={cn("gap-1 sm:gap-2 flex-1 sm:flex-initial", isPresent && "bg-green-600 hover:bg-green-700")}
                       >
                         <CheckCircle2 className="h-4 w-4" />
-                        حاضر
+                        <span className="text-xs sm:text-sm">حاضر</span>
                       </Button>
                       <Button
                         variant={isAbsent ? "default" : "outline"}
                         size="sm"
                         onClick={() => toggleAttendance(member.id, "absent")}
-                        className={cn("gap-2", isAbsent && "bg-red-600 hover:bg-red-700")}
+                        className={cn("gap-1 sm:gap-2 flex-1 sm:flex-initial", isAbsent && "bg-red-600 hover:bg-red-700")}
                       >
                         <XCircle className="h-4 w-4" />
-                        غائب
+                        <span className="text-xs sm:text-sm">غائب</span>
                       </Button>
                     </div>
                   </div>
@@ -543,16 +547,17 @@ export function AttendanceRecorder() {
       </div>
 
       {/* Save Button */}
-      <div className="sticky bottom-4">
+      <div className="sticky bottom-2 sm:bottom-4 -mx-4 px-4 lg:-mx-6 lg:px-6">
         <Button
           onClick={saveAttendance}
           disabled={saving || Object.keys(attendance).length === 0}
-          className="w-full bg-blue-600 hover:bg-blue-700"
+          className="w-full bg-blue-600 hover:bg-blue-700 shadow-lg h-12 sm:h-auto"
           size="lg"
         >
           <Save className="h-5 w-5 ml-2" />
           {saving ? "جاري الحفظ..." : "حفظ الحضور"}
         </Button>
+      </div>
       </div>
     </div>
   )

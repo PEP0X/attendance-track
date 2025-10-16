@@ -126,33 +126,37 @@ export function StudentManagement() {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Actions Bar */}
-      <Card>
-        <CardContent className="p-4">
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="relative flex-1">
-              <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <Input
-                placeholder="ابحث عن طالب..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pr-10"
-              />
+    <div>
+      {/* Actions Bar - Sticky on Mobile */}
+      <div className="sticky top-[88px] sm:top-[57px] lg:top-[57px] z-30 bg-gray-50 py-3 -mx-4 px-4 lg:-mx-6 lg:px-6 mb-3">
+        <Card className="shadow-md">
+          <CardContent className="p-4">
+            <div className="flex flex-col md:flex-row gap-4">
+              <div className="relative flex-1">
+                <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Input
+                  placeholder="ابحث عن طالب..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pr-10"
+                />
+              </div>
+              <div className="flex gap-2">
+                <Button onClick={handleAdd} className="gap-2">
+                  <Plus className="h-4 w-4" />
+                  إضافة طالب
+                </Button>
+                <Button onClick={() => setBulkImportOpen(true)} variant="outline" className="gap-2">
+                  <Upload className="h-4 w-4" />
+                  استيراد
+                </Button>
+              </div>
             </div>
-            <div className="flex gap-2">
-              <Button onClick={handleAdd} className="gap-2">
-                <Plus className="h-4 w-4" />
-                إضافة طالب
-              </Button>
-              <Button onClick={() => setBulkImportOpen(true)} variant="outline" className="gap-2">
-                <Upload className="h-4 w-4" />
-                استيراد
-              </Button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      </div>
+      
+      <div className="space-y-6">
 
       {/* Message */}
       {message && (
@@ -189,6 +193,7 @@ export function StudentManagement() {
       {/* Dialogs */}
       <StudentDialog open={dialogOpen} onOpenChange={setDialogOpen} member={editingMember} onSave={handleSave} />
       <BulkImportDialog open={bulkImportOpen} onOpenChange={setBulkImportOpen} onImport={handleBulkImport} />
+      </div>
     </div>
   )
 }

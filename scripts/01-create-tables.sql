@@ -97,6 +97,95 @@ BEGIN
   END IF;
 END $$;
 
+-- Create visits table for tracking visitations (افتقاد)
+CREATE TABLE IF NOT EXISTS visits (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  member_id UUID NOT NULL REFERENCES members(id) ON DELETE CASCADE,
+  date DATE NOT NULL,
+  status TEXT NOT NULL CHECK (status IN ('visited', 'not_visited')),
+  notes TEXT,
+  visited_by UUID REFERENCES auth.users(id),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  UNIQUE(member_id, date)
+);
+
+-- Create member_assignments table to distribute students across servants
+CREATE TABLE IF NOT EXISTS member_assignments (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  member_id UUID NOT NULL REFERENCES members(id) ON DELETE CASCADE,
+  servant_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  assigned_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  UNIQUE(member_id)
+);
+
+-- Enable RLS for visits and member_assignments
+ALTER TABLE visits ENABLE ROW LEVEL SECURITY;
+ALTER TABLE member_assignments ENABLE ROW LEVEL SECURITY;
+
+-- Indexes
+CREATE INDEX IF NOT EXISTS idx_visits_date ON visits(date);
+CREATE INDEX IF NOT EXISTS idx_visits_member_id ON visits(member_id);
+CREATE INDEX IF NOT EXISTS idx_member_assignments_servant_id ON member_assignments(servant_id);
+
+-- RLS Policies for visits table (idempotent)
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = 'visits' AND policyname = 'Authenticated users can view visits'
+  ) THEN
+    CREATE POLICY "Authenticated users can view visits"
+      ON visits FOR SELECT
+      TO authenticated
+      USING (true);
+  END IF;
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = 'visits' AND policyname = 'Authenticated users can insert visits'
+  ) THEN
+    CREATE POLICY "Authenticated users can insert visits"
+      ON visits FOR INSERT
+      TO authenticated
+      WITH CHECK (true);
+  END IF;
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = 'visits' AND policyname = 'Authenticated users can update visits'
+  ) THEN
+    CREATE POLICY "Authenticated users can update visits"
+      ON visits FOR UPDATE
+      TO authenticated
+      USING (true);
+  END IF;
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = 'visits' AND policyname = 'Authenticated users can delete visits'
+  ) THEN
+    CREATE POLICY "Authenticated users can delete visits"
+      ON visits FOR DELETE
+      TO authenticated
+      USING (true);
+  END IF;
+END $$;
+
+-- RLS Policies for member_assignments table (idempotent)
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = 'member_assignments' AND policyname = 'Authenticated users can view member assignments'
+  ) THEN
+    CREATE POLICY "Authenticated users can view member assignments"
+      ON member_assignments FOR SELECT
+      TO authenticated
+      USING (true);
+  END IF;
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = 'member_assignments' AND policyname = 'Admins can manage assignments'
+  ) THEN
+    CREATE POLICY "Admins can manage assignments"
+      ON member_assignments FOR ALL
+      TO authenticated
+      USING ((SELECT role FROM users WHERE id = auth.uid()) = 'admin')
+      WITH CHECK ((SELECT role FROM users WHERE id = auth.uid()) = 'admin');
+  END IF;
+END $$;
+
 -- RLS Policies for attendance table (idempotent)
 DO $$
 BEGIN

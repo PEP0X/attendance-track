@@ -80,10 +80,7 @@ export default function LoginPage() {
         <div className="absolute bottom-20 right-20 w-72 h-72 bg-purple-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse animation-delay-2000"></div>
         
         <Card className="w-full max-w-md relative z-10 shadow-2xl border-2 border-white/50 bg-white/80 backdrop-blur-xl">
-          <CardHeader className="space-y-3 text-center bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white rounded-t-xl pb-8 px-6">
-            <div className="mx-auto w-20 h-20 bg-white/20 backdrop-blur-lg rounded-2xl flex items-center justify-center mb-2 shadow-lg border-2 border-white/30">
-              <LogIn className="w-10 h-10 text-white" />
-            </div>
+          <CardHeader className="space-y-3 text-center bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white rounded-t-xl py-8 px-6 ">
             <CardTitle className="text-2xl md:text-3xl font-black leading-tight">
               مدرسة الأرشيدياكون حبيب جرجس
             </CardTitle>

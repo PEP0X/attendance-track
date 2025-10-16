@@ -5,7 +5,7 @@ import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { getSupabaseBrowserClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
-import { ClipboardList, Users, BarChart3, UserCog, LogOut, Menu, X } from "lucide-react"
+import { ClipboardList, Users, BarChart3, UserCog, LogOut, Menu, X, Handshake } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 interface DashboardLayoutProps {
@@ -14,6 +14,7 @@ interface DashboardLayoutProps {
 
 const navItems = [
   { href: "/dashboard", label: "تسجيل الحضور", icon: ClipboardList },
+  { href: "/visitation", label: "نظام الافتقاد", icon: Handshake },
   { href: "/students", label: "إدارة الطلاب", icon: Users },
   { href: "/reports", label: "التقارير والإحصائيات", icon: BarChart3 },
   { href: "/users", label: "إدارة المستخدمين", icon: UserCog },
@@ -44,7 +45,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
 
   useEffect(() => {
     // Proactively prefetch main routes to speed up navigation
-    const routesToPrefetch = ["/dashboard", "/students", "/reports", "/users"]
+    const routesToPrefetch = ["/dashboard", "/visitation", "/students", "/reports", "/users"]
     routesToPrefetch.forEach((path) => {
       try {
         router.prefetch(path)

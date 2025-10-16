@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { WelcomeModal } from "@/components/ui/welcome-modal"
+import { LogIn, Mail, Lock } from "lucide-react"
 
 export default function LoginPage() {
   const [email, setEmail] = useState("")
@@ -73,64 +74,87 @@ export default function LoginPage() {
   return (
     <>
       <WelcomeModal isOpen={showWelcome} onClose={() => setShowWelcome(false)} userName={userName} />
-      <div className="min-h-screen flex items-center justify-center bg-blue-50 p-3 sm:p-4 overflow-x-hidden">
-        <Card className="w-full max-w-md shadow-lg border border-blue-200">
-          <CardHeader className="space-y-2 text-center bg-blue-600 text-white rounded-t-lg pb-4 sm:pb-6 px-3 sm:px-6">
-            <CardTitle className="text-lg sm:text-xl md:text-2xl font-bold pt-2 sm:pt-3 leading-tight break-words">
+      <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 relative overflow-hidden">
+        {/* Animated Background Circles */}
+        <div className="absolute top-20 left-20 w-72 h-72 bg-blue-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse"></div>
+        <div className="absolute bottom-20 right-20 w-72 h-72 bg-purple-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse animation-delay-2000"></div>
+        
+        <Card className="w-full max-w-md relative z-10 shadow-2xl border-2 border-white/50 bg-white/80 backdrop-blur-xl">
+          <CardHeader className="space-y-3 text-center bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white rounded-t-xl pb-8 px-6">
+            <div className="mx-auto w-20 h-20 bg-white/20 backdrop-blur-lg rounded-2xl flex items-center justify-center mb-2 shadow-lg border-2 border-white/30">
+              <LogIn className="w-10 h-10 text-white" />
+            </div>
+            <CardTitle className="text-2xl md:text-3xl font-black leading-tight">
               مدرسة الأرشيدياكون حبيب جرجس
             </CardTitle>
-            <CardDescription className="text-sm sm:text-base md:text-lg text-blue-50 font-medium">
-              نظام إدارة الحضور
+            <CardDescription className="text-base md:text-lg text-white/90 font-semibold">
+              ⚡ نظام إدارة الحضور
             </CardDescription>
           </CardHeader>
-        <CardContent className="p-4 sm:p-6">
-          <form onSubmit={handleLogin} className="space-y-4">
-            {error && (
-              <Alert variant="destructive">
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            )}
+          
+          <CardContent className="p-6 sm:p-8">
+            <form onSubmit={handleLogin} className="space-y-5">
+              {error && (
+                <Alert variant="destructive" className="border-2 animate-shake">
+                  <AlertDescription className="font-semibold">{error}</AlertDescription>
+                </Alert>
+              )}
 
-            <div className="space-y-2">
-              <Label htmlFor="email" className="text-sm sm:text-base">البريد الإلكتروني</Label>
-              <Input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="servant@example.com"
-                required
+              <div className="space-y-2">
+                <Label htmlFor="email" className="text-sm font-bold text-gray-700">البريد الإلكتروني</Label>
+                <div className="relative">
+                  <Mail className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                  <Input
+                    id="email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="servant@example.com"
+                    required
+                    disabled={loading}
+                    className="pr-11 h-12 text-base border-2 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 rounded-xl"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="password" className="text-sm font-bold text-gray-700">كلمة المرور</Label>
+                <div className="relative">
+                  <Lock className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                  <Input
+                    id="password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="••••••••"
+                    required
+                    disabled={loading}
+                    className="pr-11 h-12 text-base border-2 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 rounded-xl"
+                  />
+                </div>
+              </div>
+
+              <Button 
+                type="submit" 
+                className="w-full h-14 text-lg font-black bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-700 hover:via-indigo-700 hover:to-purple-700 text-white shadow-xl hover:shadow-2xl transition-all duration-300 rounded-xl" 
                 disabled={loading}
-                className="text-right h-10 sm:h-auto text-sm sm:text-base"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="password" className="text-sm sm:text-base">كلمة المرور</Label>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                required
-                disabled={loading}
-                className="text-right h-10 sm:h-auto text-sm sm:text-base"
-              />
-            </div>
-
-            <Button 
-              type="submit" 
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold h-11 sm:h-10 text-sm sm:text-base" 
-              disabled={loading}
-            >
-              {loading ? "جاري تسجيل الدخول..." : "تسجيل الدخول"}
-            </Button>
-
-          </form>
-        </CardContent>
-      </Card>
-    </div>
+              >
+                {loading ? (
+                  <div className="flex items-center gap-2">
+                    <div className="inline-block h-5 w-5 animate-spin rounded-full border-3 border-solid border-white border-r-transparent"></div>
+                    <span>جاري تسجيل الدخول...</span>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <LogIn className="h-5 w-5" />
+                    <span>تسجيل الدخول</span>
+                  </div>
+                )}
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
+      </div>
     </>
   )
 }

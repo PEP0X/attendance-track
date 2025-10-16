@@ -5,7 +5,7 @@ import { getSupabaseBrowserClient } from "@/lib/supabase/client"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Search, Plus } from "lucide-react"
+import { Search, Plus, Users as UsersIcon } from "lucide-react"
 import { UserCard } from "./user-card"
 import { UserDialog } from "./user-dialog"
 import { Alert, AlertDescription } from "@/components/ui/alert"
@@ -108,68 +108,80 @@ export function UserManagement() {
 
   if (loading) {
     return (
-      <Card>
-        <CardContent className="p-6">
-          <p className="text-center text-gray-500">جاري التحميل...</p>
+      <Card className="border-2">
+        <CardContent className="p-12 text-center">
+          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-blue-600 border-r-transparent"></div>
+          <p className="text-gray-600 mt-4 font-medium">جاري التحميل...</p>
         </CardContent>
       </Card>
     )
   }
 
   return (
-    <div className="space-y-6">
-      {/* Actions Bar */}
-      <Card>
-        <CardContent className="p-4">
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="relative flex-1">
-              <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <Input
-                placeholder="ابحث عن مستخدم..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pr-10"
-              />
+    <div className="relative">
+      {/* Modern Sticky Header */}
+      <div className="sticky top-0 z-40 -mx-4 px-4 lg:-mx-6 lg:px-6 mb-6">
+        <div className="max-w-6xl mx-auto bg-white/95 backdrop-blur-xl border-b-2 border-gray-200 shadow-lg rounded-b-2xl p-4 sm:p-5 space-y-4">
+          {/* Stats Card */}
+          <div className="bg-gradient-to-br from-purple-100 to-purple-50 rounded-xl p-4 text-center border-2 border-purple-300 shadow-sm">
+            <div className="flex items-center justify-center gap-3">
+              <div className="bg-purple-600 p-2 rounded-lg">
+                <UsersIcon className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <p className="text-3xl font-black text-purple-900">{users.length}</p>
+                <p className="text-sm font-semibold text-purple-700">إجمالي المستخدمين</p>
+              </div>
             </div>
-            <Button onClick={handleAdd} className="gap-2">
-              <Plus className="h-4 w-4" />
-              إضافة مستخدم
-            </Button>
           </div>
-        </CardContent>
-      </Card>
 
-      {/* Message */}
+          {/* Search Bar */}
+          <div className="relative">
+            <Search className="absolute right-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none" />
+            <Input
+              placeholder="🔍 ابحث عن مستخدم..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pr-12 h-12 text-base border-2 border-gray-300 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 rounded-xl shadow-sm"
+            />
+          </div>
+
+          {/* Add Button */}
+          <Button
+            onClick={handleAdd}
+            className="w-full bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-bold shadow-md hover:shadow-lg transition-all h-11"
+          >
+            <Plus className="h-5 w-5 ml-1" />
+            إضافة مستخدم جديد
+          </Button>
+        </div>
+      </div>
+
+      {/* Message Alert */}
       {message && (
-        <Alert variant={message.type === "error" ? "destructive" : "default"}>
-          <AlertDescription>{message.text}</AlertDescription>
+        <Alert variant={message.type === "error" ? "destructive" : "default"} className="mb-4">
+          <AlertDescription className="font-medium">{message.text}</AlertDescription>
         </Alert>
       )}
 
-      {/* Stats */}
-      <Card>
-        <CardContent className="p-6">
-          <div className="text-center">
-            <p className="text-3xl font-bold text-primary">{users.length}</p>
-            <p className="text-gray-600 mt-1">إجمالي المستخدمين</p>
+      {/* Users Grid */}
+      <div className="max-w-6xl mx-auto grid gap-3 sm:gap-4 md:grid-cols-2 lg:grid-cols-2 pb-8">
+        {filteredUsers.length === 0 && (
+          <div className="col-span-full">
+            <Card className="border-2 border-dashed border-gray-300 bg-gray-50">
+              <CardContent className="p-12 text-center">
+                <Search className="h-16 w-16 text-gray-300 mx-auto mb-3" />
+                <p className="text-gray-600 font-semibold text-lg">لا توجد نتائج</p>
+                <p className="text-sm text-gray-400 mt-1">جرب البحث بكلمات أخرى أو أضف مستخدم جديد</p>
+              </CardContent>
+            </Card>
           </div>
-        </CardContent>
-      </Card>
-
-      {/* Users List */}
-      <div className="grid gap-4 md:grid-cols-2">
+        )}
+        
         {filteredUsers.map((user) => (
           <UserCard key={user.id} user={user} onDelete={handleDelete} />
         ))}
       </div>
-
-      {filteredUsers.length === 0 && (
-        <Card>
-          <CardContent className="p-12 text-center">
-            <p className="text-gray-500">لا توجد نتائج</p>
-          </CardContent>
-        </Card>
-      )}
 
       {/* Dialog */}
       <UserDialog open={dialogOpen} onOpenChange={setDialogOpen} onCreate={handleCreate} />

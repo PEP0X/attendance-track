@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Download, Calendar, TrendingUp, Users, CheckCircle2, XCircle } from "lucide-react"
+import { Download, Calendar, TrendingUp, Users, CheckCircle2, XCircle, FileSpreadsheet, FileText } from "lucide-react"
 import dynamic from "next/dynamic"
 const AttendanceChart = dynamic(() => import("./attendance-chart").then(m => m.AttendanceChart), { ssr: false })
 const StudentAttendanceTable = dynamic(() => import("./student-attendance-table").then(m => m.StudentAttendanceTable), { ssr: false })
@@ -144,44 +144,53 @@ export function ReportsAnalytics() {
 
   if (loading) {
     return (
-      <Card>
-        <CardContent className="p-6">
-          <p className="text-center text-gray-500">جاري التحميل...</p>
+      <Card className="border-2">
+        <CardContent className="p-12 text-center">
+          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-blue-600 border-r-transparent"></div>
+          <p className="text-gray-600 mt-4 font-medium">جاري التحميل...</p>
         </CardContent>
       </Card>
     )
   }
 
   return (
-    <div className="space-y-6">
-      {/* Filters */}
-      <Card>
-        <CardContent className="p-6">
-          <div className="grid gap-4 md:grid-cols-3">
-            <div className="space-y-2">
-              <Label htmlFor="start-date">من تاريخ</Label>
-              <Input
-                id="start-date"
-                type="date"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-                className="w-full"
-              />
+    <div className="relative space-y-6">
+      {/* Modern Filters Card - Sticky */}
+      <div className="sticky top-0 z-40 -mx-4 px-4 lg:-mx-6 lg:px-6 mb-6">
+        <div className="max-w-6xl mx-auto bg-white/95 backdrop-blur-xl border-b-2 border-gray-200 shadow-lg rounded-b-2xl p-4 sm:p-5 space-y-4">
+          <div className="grid gap-3 md:grid-cols-3">
+            <div className="space-y-1.5">
+              <Label htmlFor="start-date" className="text-xs font-bold text-gray-600">من تاريخ</Label>
+              <div className="flex items-center gap-2 px-3 py-2 bg-blue-50 rounded-lg border border-blue-200">
+                <Calendar className="h-4 w-4 text-blue-600 flex-shrink-0" />
+                <Input
+                  id="start-date"
+                  type="date"
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                  className="border-0 bg-transparent p-0 h-auto text-sm focus-visible:ring-0"
+                />
+              </div>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="end-date">إلى تاريخ</Label>
-              <Input
-                id="end-date"
-                type="date"
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-                className="w-full"
-              />
+            
+            <div className="space-y-1.5">
+              <Label htmlFor="end-date" className="text-xs font-bold text-gray-600">إلى تاريخ</Label>
+              <div className="flex items-center gap-2 px-3 py-2 bg-blue-50 rounded-lg border border-blue-200">
+                <Calendar className="h-4 w-4 text-blue-600 flex-shrink-0" />
+                <Input
+                  id="end-date"
+                  type="date"
+                  value={endDate}
+                  onChange={(e) => setEndDate(e.target.value)}
+                  className="border-0 bg-transparent p-0 h-auto text-sm focus-visible:ring-0"
+                />
+              </div>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="student">الطالب</Label>
+            
+            <div className="space-y-1.5">
+              <Label htmlFor="student" className="text-xs font-bold text-gray-600">اختر الطالب</Label>
               <Select value={selectedStudent} onValueChange={setSelectedStudent}>
-                <SelectTrigger id="student">
+                <SelectTrigger id="student" className="h-10 border-2 border-gray-300 focus:border-blue-500">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -195,106 +204,115 @@ export function ReportsAnalytics() {
               </Select>
             </div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
-      {/* Stats Cards */}
-      <div className="grid gap-4 md:grid-cols-5">
-        <Card>
-          <CardContent className="p-6">
+      {/* Modern Stats Cards with Gradients */}
+      <div className="max-w-6xl mx-auto grid gap-2 sm:gap-3 md:gap-4 md:grid-cols-5">
+        <Card className="border-2 border-blue-300 bg-gradient-to-br from-blue-100 to-blue-50 shadow-md hover:shadow-xl transition-all">
+          <CardContent className="p-5">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <Calendar className="h-5 w-5 text-blue-600" />
+              <div className="p-3 bg-blue-600 rounded-xl shadow-lg">
+                <Calendar className="h-6 w-6 text-white" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-gray-900">{stats.totalMeetings}</p>
-                <p className="text-sm text-gray-600">اجتماع</p>
+                <p className="text-3xl font-black text-blue-900">{stats.totalMeetings}</p>
+                <p className="text-sm font-semibold text-blue-700">اجتماع</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardContent className="p-6">
+        <Card className="border-2 border-purple-300 bg-gradient-to-br from-purple-100 to-purple-50 shadow-md hover:shadow-xl transition-all">
+          <CardContent className="p-5">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-purple-100 rounded-lg">
-                <Users className="h-5 w-5 text-purple-600" />
+              <div className="p-3 bg-purple-600 rounded-xl shadow-lg">
+                <Users className="h-6 w-6 text-white" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-gray-900">{stats.totalStudents}</p>
-                <p className="text-sm text-gray-600">طالب</p>
+                <p className="text-3xl font-black text-purple-900">{stats.totalStudents}</p>
+                <p className="text-sm font-semibold text-purple-700">طالب</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardContent className="p-6">
+        <Card className="border-2 border-green-300 bg-gradient-to-br from-green-100 to-green-50 shadow-md hover:shadow-xl transition-all">
+          <CardContent className="p-5">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-green-100 rounded-lg">
-                <TrendingUp className="h-5 w-5 text-green-600" />
+              <div className="p-3 bg-green-600 rounded-xl shadow-lg">
+                <TrendingUp className="h-6 w-6 text-white" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-gray-900">{stats.averageAttendance}%</p>
-                <p className="text-sm text-gray-600">متوسط الحضور</p>
+                <p className="text-3xl font-black text-green-900">{stats.averageAttendance}%</p>
+                <p className="text-sm font-semibold text-green-700">متوسط</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardContent className="p-6">
+        <Card className="border-2 border-emerald-300 bg-gradient-to-br from-emerald-100 to-emerald-50 shadow-md hover:shadow-xl transition-all">
+          <CardContent className="p-5">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-green-100 rounded-lg">
-                <CheckCircle2 className="h-5 w-5 text-green-600" />
+              <div className="p-3 bg-emerald-600 rounded-xl shadow-lg">
+                <CheckCircle2 className="h-6 w-6 text-white" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-gray-900">{stats.totalPresent}</p>
-                <p className="text-sm text-gray-600">حاضر</p>
+                <p className="text-3xl font-black text-emerald-900">{stats.totalPresent}</p>
+                <p className="text-sm font-semibold text-emerald-700">حاضر</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardContent className="p-6">
+        <Card className="border-2 border-rose-300 bg-gradient-to-br from-rose-100 to-rose-50 shadow-md hover:shadow-xl transition-all">
+          <CardContent className="p-5">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-red-100 rounded-lg">
-                <XCircle className="h-5 w-5 text-red-600" />
+              <div className="p-3 bg-rose-600 rounded-xl shadow-lg">
+                <XCircle className="h-6 w-6 text-white" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-gray-900">{stats.totalAbsent}</p>
-                <p className="text-sm text-gray-600">غائب</p>
+                <p className="text-3xl font-black text-rose-900">{stats.totalAbsent}</p>
+                <p className="text-sm font-semibold text-rose-700">غائب</p>
               </div>
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Chart */}
-      <Card>
-        <CardHeader>
-          <CardTitle>رسم بياني للحضور</CardTitle>
+      {/* Chart Card */}
+      <Card className="max-w-6xl mx-auto border-2 border-gray-200 shadow-lg">
+        <CardHeader className="bg-gradient-to-r from-gray-50 to-white border-b-2 border-gray-200">
+          <CardTitle className="text-xl font-black text-gray-900">📊 رسم بياني للحضور</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-6">
           <AttendanceChart attendance={attendance} />
         </CardContent>
       </Card>
 
-      {/* Export Buttons */}
-      <Card>
-        <CardContent className="p-6">
-          <div className="flex flex-wrap gap-2">
-            <Button onClick={() => handleExport("pdf")} variant="outline" className="gap-2">
-              <Download className="h-4 w-4" />
+      {/* Export Buttons Card */}
+      <Card className="max-w-6xl mx-auto border-2 border-gray-200 shadow-lg">
+        <CardContent className="p-5">
+          <div className="flex flex-wrap gap-3">
+            <Button 
+              onClick={() => handleExport("pdf")} 
+              className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-bold shadow-md hover:shadow-lg transition-all"
+            >
+              <FileText className="h-4 w-4 ml-2" />
               تصدير PDF
             </Button>
-            <Button onClick={() => handleExport("excel")} variant="outline" className="gap-2">
-              <Download className="h-4 w-4" />
+            <Button 
+              onClick={() => handleExport("excel")} 
+              className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-bold shadow-md hover:shadow-lg transition-all"
+            >
+              <FileSpreadsheet className="h-4 w-4 ml-2" />
               تصدير Excel
             </Button>
-            <Button onClick={() => handleExport("csv")} variant="outline" className="gap-2">
-              <Download className="h-4 w-4" />
+            <Button 
+              onClick={() => handleExport("csv")} 
+              className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold shadow-md hover:shadow-lg transition-all"
+            >
+              <Download className="h-4 w-4 ml-2" />
               تصدير CSV
             </Button>
           </div>
@@ -302,11 +320,11 @@ export function ReportsAnalytics() {
       </Card>
 
       {/* Attendance Table */}
-      <Card>
-        <CardHeader>
-          <CardTitle>سجل الحضور التفصيلي</CardTitle>
+      <Card className="max-w-6xl mx-auto border-2 border-gray-200 shadow-lg mb-8">
+        <CardHeader className="bg-gradient-to-r from-gray-50 to-white border-b-2 border-gray-200">
+          <CardTitle className="text-xl font-black text-gray-900">📋 سجل الحضور التفصيلي</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-6">
           <StudentAttendanceTable attendance={attendance} />
         </CardContent>
       </Card>

@@ -383,159 +383,195 @@ export function AttendanceRecorder() {
   }
 
   return (
-    <div>
-      {/* Date Selection and Stats */}
-      <Card className="mb-6">
-        <CardContent className="p-4 sm:p-6">
-          <div className="flex flex-col gap-4">
-            {/* Date Picker */}
-            <div className="flex items-center gap-3">
+    <div className="relative">
+      {/* Modern Sticky Top Section - Date, Stats, Search & Actions */}
+      <div className="sticky top-0 z-40 -mx-4 px-4 lg:-mx-6 lg:px-6 mb-6">
+        <div className="max-w-6xl mx-auto bg-white/95 backdrop-blur-lg border-b-2 border-gray-200 shadow-lg rounded-b-2xl p-4 sm:p-5 space-y-4">
+          {/* Date Picker */}
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 px-3 py-2 bg-blue-50 rounded-lg border border-blue-200 flex-1">
               <Calendar className="h-5 w-5 text-blue-600 flex-shrink-0" />
-              <div className="flex-1">
-                <Label htmlFor="date" className="text-sm text-gray-600">
-                  تاريخ الاجتماع
-                </Label>
-                <Input
-                  id="date"
-                  type="date"
-                  value={selectedDate}
-                  onChange={(e) => setSelectedDate(e.target.value)}
-                  className="mt-1 w-full"
-                />
-              </div>
-            </div>
-
-            {/* Stats - Responsive Grid */}
-            <div className="grid grid-cols-3 gap-2 sm:gap-4 pt-2 border-t border-gray-200">
-              <div className="text-center">
-                <p className="text-xl sm:text-2xl font-bold text-gray-900">{stats.total}</p>
-                <p className="text-xs sm:text-sm text-gray-600">إجمالي الطلاب</p>
-              </div>
-              <div className="text-center">
-                <p className="text-xl sm:text-2xl font-bold text-green-600">{stats.present}</p>
-                <p className="text-xs sm:text-sm text-gray-600">حاضر</p>
-              </div>
-              <div className="text-center">
-                <p className="text-xl sm:text-2xl font-bold text-red-600">{stats.absent}</p>
-                <p className="text-xs sm:text-sm text-gray-600">غائب</p>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Search + Bulk actions - Sticky on Mobile */}
-      <div className="sticky top-[88px] sm:top-[57px] lg:top-[57px] z-30 bg-gray-50 py-3 -mx-4 px-4 lg:-mx-6 lg:px-6 mb-3">
-        <Card className="shadow-md">
-          <CardContent className="p-4 space-y-3">
-            <div className="relative">
-              <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input
-                placeholder="ابحث عن طالب..."
-                value={searchInput}
-                onChange={(e) => setSearchInput(e.target.value)}
-                className="pr-10"
+                type="date"
+                value={selectedDate}
+                onChange={(e) => setSelectedDate(e.target.value)}
+                className="border-0 bg-transparent p-0 h-auto text-sm font-medium focus-visible:ring-0"
               />
             </div>
-            <div className="flex flex-wrap gap-2">
-              <Button variant="outline" size="sm" onClick={() => bulkMark("present")}>
-                كله حاضر
-              </Button>
-              <Button variant="outline" size="sm" onClick={() => bulkMark("absent")}>
-                  كله غائب
-              </Button>
-              <Button variant="outline" size="sm" onClick={bulkReset}>
-                إعادة التعيين للكل
-              </Button>
-              <Button variant="outline" size="sm" onClick={markUnselectedAsAbsent}>
-  الباقي غائبين
-              </Button>
+          </div>
+
+          {/* Modern Stats Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3">
+            <div className="bg-gradient-to-br from-slate-100 to-slate-50 rounded-xl p-3 text-center border-2 border-slate-200 shadow-sm">
+              <p className="text-2xl font-black text-slate-900">{stats.total}</p>
+              <p className="text-xs font-semibold text-slate-600 mt-1">الكل</p>
             </div>
-          </CardContent>
-        </Card>
+            <div className="bg-gradient-to-br from-emerald-100 to-emerald-50 rounded-xl p-3 text-center border-2 border-emerald-300 shadow-sm">
+              <p className="text-2xl font-black text-emerald-700">{stats.present}</p>
+              <p className="text-xs font-semibold text-emerald-600 mt-1">حاضر</p>
+            </div>
+            <div className="bg-gradient-to-br from-rose-100 to-rose-50 rounded-xl p-3 text-center border-2 border-rose-300 shadow-sm">
+              <p className="text-2xl font-black text-rose-700">{stats.absent}</p>
+              <p className="text-xs font-semibold text-rose-600 mt-1">غائب</p>
+            </div>
+          </div>
+
+          {/* Modern Search Bar */}
+          <div className="relative">
+            <Search className="absolute right-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none" />
+            <Input
+              placeholder="🔍 ابحث عن طالب..."
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              className="pr-12 h-12 text-base border-2 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 rounded-xl shadow-sm"
+            />
+          </div>
+
+          {/* Modern Bulk Action Buttons */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            <Button 
+              onClick={() => bulkMark("present")}
+              size="sm"
+              className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-bold shadow-md hover:shadow-lg transition-all"
+            >
+              <CheckCircle2 className="h-4 w-4 ml-1" />
+              كله حاضر
+            </Button>
+            <Button 
+              onClick={() => bulkMark("absent")}
+              size="sm"
+              className="bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-600 hover:to-rose-700 text-white font-bold shadow-md hover:shadow-lg transition-all"
+            >
+              <XCircle className="h-4 w-4 ml-1" />
+              كله غائب
+            </Button>
+            <Button 
+              onClick={bulkReset}
+              size="sm"
+              variant="outline"
+              className="border-2 border-gray-300 hover:bg-gray-100 font-semibold"
+            >
+              إعادة تعيين
+            </Button>
+            <Button 
+              onClick={markUnselectedAsAbsent}
+              size="sm"
+              className="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-bold shadow-md hover:shadow-lg transition-all"
+            >
+              الباقي غائبين
+            </Button>
+          </div>
+        </div>
       </div>
-      
-      <div className="space-y-6">
-      {/* Message */}
+
+      {/* Message Alert */}
       {message && (
-        <Alert variant={message.type === "error" ? "destructive" : "default"}>
-          <AlertDescription>{message.text}</AlertDescription>
+        <Alert variant={message.type === "error" ? "destructive" : "default"} className="mb-4">
+          <AlertDescription className="font-medium">{message.text}</AlertDescription>
         </Alert>
       )}
 
-      {/* Attendance List */}
-      <div className="grid gap-4">
+      {/* Modern Student Cards */}
+      <div className="space-y-3 pb-28">
         {filteredMembers.length === 0 && (
-          <Card>
-            <CardContent className="p-6">
-              <p className="text-center text-gray-500">لا توجد نتائج مطابقة لبحثك.</p>
+          <Card className="border-2 border-dashed border-gray-300 bg-gray-50">
+            <CardContent className="p-8 text-center">
+              <Search className="h-16 w-16 text-gray-300 mx-auto mb-3" />
+              <p className="text-gray-500 font-semibold">لا توجد نتائج</p>
+              <p className="text-sm text-gray-400 mt-1">جرب البحث بكلمات أخرى</p>
             </CardContent>
           </Card>
         )}
+        
         {filteredMembers.map((member) => {
           const record = attendance[member.id]
           const isPresent = record?.status === "present"
           const isAbsent = record?.status === "absent"
 
           return (
-            <Card key={member.id}>
-              <CardContent className="p-3 sm:p-4">
-                <div className="space-y-3 sm:space-y-4">
-                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+            <Card 
+              key={member.id} 
+              className={cn(
+                "transition-all duration-300 hover:shadow-xl border-2",
+                isPresent && "border-emerald-400 bg-emerald-50/40 shadow-lg",
+                isAbsent && "border-rose-400 bg-rose-50/40 shadow-lg",
+                !record && "border-gray-200 hover:border-gray-300"
+              )}
+            >
+              <CardContent className="p-4">
+                <div className="space-y-3">
+                  {/* Name & Status Buttons */}
+                  <div className="flex items-start justify-between gap-3">
                     <div className="flex-1 min-w-0">
-                      <h3 className="font-semibold text-base sm:text-lg text-gray-900 break-words">{member.name}</h3>
+                      <h3 className="font-bold text-lg text-gray-900 break-words leading-tight">{member.name}</h3>
                       {member.phones && member.phones.length > 0 && (
-                        <p className="text-xs sm:text-sm text-gray-600 mt-1 break-all">{member.phones.join(" · ")}</p>
+                        <p className="text-sm text-gray-600 mt-1.5 break-all">{member.phones.join(" • ")}</p>
                       )}
-                      {member.notes && <p className="text-xs sm:text-sm text-gray-500 mt-1">{member.notes}</p>}
+                      {member.notes && (
+                        <div className="mt-2 inline-flex">
+                          <span className="text-xs bg-gray-200 text-gray-700 px-2 py-1 rounded-md font-medium">
+                            {member.notes}
+                          </span>
+                        </div>
+                      )}
                     </div>
 
                     <div className="flex gap-2 flex-shrink-0">
                       <Button
-                        variant={isPresent ? "default" : "outline"}
-                        size="sm"
                         onClick={() => toggleAttendance(member.id, "present")}
-                        className={cn("gap-1 sm:gap-2 flex-1 sm:flex-initial", isPresent && "bg-green-600 hover:bg-green-700")}
+                        size="sm"
+                        className={cn(
+                          "transition-all duration-200",
+                          isPresent 
+                            ? "bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg scale-110" 
+                            : "bg-white border-2 border-emerald-300 text-emerald-700 hover:bg-emerald-50"
+                        )}
                       >
-                        <CheckCircle2 className="h-4 w-4" />
-                        <span className="text-xs sm:text-sm">حاضر</span>
+                        <CheckCircle2 className={cn("h-4 w-4", isPresent && "animate-pulse")} />
+                        <span className="hidden sm:inline ml-1">حاضر</span>
                       </Button>
                       <Button
-                        variant={isAbsent ? "default" : "outline"}
-                        size="sm"
                         onClick={() => toggleAttendance(member.id, "absent")}
-                        className={cn("gap-1 sm:gap-2 flex-1 sm:flex-initial", isAbsent && "bg-red-600 hover:bg-red-700")}
+                        size="sm"
+                        className={cn(
+                          "transition-all duration-200",
+                          isAbsent 
+                            ? "bg-rose-600 hover:bg-rose-700 text-white shadow-lg scale-110" 
+                            : "bg-white border-2 border-rose-300 text-rose-700 hover:bg-rose-50"
+                        )}
                       >
-                        <XCircle className="h-4 w-4" />
-                        <span className="text-xs sm:text-sm">غائب</span>
+                        <XCircle className={cn("h-4 w-4", isAbsent && "animate-pulse")} />
+                        <span className="hidden sm:inline ml-1">غائب</span>
                       </Button>
                     </div>
                   </div>
 
+                  {/* Notes Section */}
                   {record && (
-                    <div>
-                      <Label htmlFor={`notes-${member.id}`} className="text-sm">
+                    <div className="pt-3 border-t-2 border-gray-200">
+                      <Label htmlFor={`notes-${member.id}`} className="text-xs font-bold text-gray-600 uppercase">
                         ملاحظات
                       </Label>
                       <Textarea
                         id={`notes-${member.id}`}
                         value={record.notes}
                         onChange={(e) => updateNotes(member.id, e.target.value)}
-                        placeholder="أضف ملاحظات..."
-                        className="mt-1 resize-none"
+                        placeholder="أضف ملاحظات هنا..."
+                        className="mt-2 resize-none text-sm border-2 border-gray-300 focus:border-blue-500 rounded-lg"
                         rows={2}
                       />
                       {(record.recorded_by || record.created_at) && (
-                        <p className="text-xs text-gray-500 mt-2">
+                        <div className="flex items-center gap-2 mt-2 text-xs text-gray-500 bg-gray-100 rounded-lg px-3 py-1.5">
                           {record.created_at && (
-                            <span>{new Date(record.created_at).toLocaleString()} — </span>
+                            <span className="font-medium">{new Date(record.created_at).toLocaleString("ar-EG")}</span>
                           )}
                           {record.recorded_by && (
-                            <span>
-                              بواسطة {users.find((u) => u.id === record.recorded_by)?.name || record.recorded_by}
-                            </span>
+                            <>
+                              <span>•</span>
+                              <span>بواسطة {users.find((u) => u.id === record.recorded_by)?.name || "مستخدم"}</span>
+                            </>
                           )}
-                        </p>
+                        </div>
                       )}
                     </div>
                   )}
@@ -546,18 +582,19 @@ export function AttendanceRecorder() {
         })}
       </div>
 
-      {/* Save Button */}
-      <div className="sticky bottom-2 sm:bottom-4 -mx-4 px-4 lg:-mx-6 lg:px-6">
-        <Button
-          onClick={saveAttendance}
-          disabled={saving || Object.keys(attendance).length === 0}
-          className="w-full bg-blue-600 hover:bg-blue-700 shadow-lg h-12 sm:h-auto"
-          size="lg"
-        >
-          <Save className="h-5 w-5 ml-2" />
-          {saving ? "جاري الحفظ..." : "حفظ الحضور"}
-        </Button>
-      </div>
+      {/* Modern Fixed Save Button */}
+      <div className="fixed bottom-0 left-0 right-0 z-50 p-4 lg:px-6">
+        <div className="max-w-6xl mx-auto">
+          <Button
+            onClick={saveAttendance}
+            disabled={saving || Object.keys(attendance).length === 0}
+            className="w-full h-16 text-lg font-black bg-gradient-to-r from-blue-600 via-blue-700 to-blue-600 hover:from-blue-700 hover:via-blue-800 hover:to-blue-700 text-white shadow-2xl hover:shadow-blue-500/50 transition-all duration-300 rounded-2xl border-2 border-blue-800 disabled:opacity-50 disabled:cursor-not-allowed"
+            size="lg"
+          >
+            <Save className="h-6 w-6 ml-2" />
+            {saving ? "جاري الحفظ..." : "💾 حفظ الحضور"}
+          </Button>
+        </div>
       </div>
     </div>
   )

@@ -3,7 +3,7 @@
 import type React from "react"
 
 import { useState, useEffect } from "react"
-// Native Tailwind-only modal. No external UI components.
+import { UserPlus, UserCheck, Phone, StickyNote, X, Plus, Sparkles } from "lucide-react"
 
 interface Member {
   id: string
@@ -80,80 +80,167 @@ export function StudentDialog({ open, onOpenChange, member, onSave }: StudentDia
   }
 
   return (
-    <div className="fixed inset-0 z-50" aria-modal="true" role="dialog" onClick={onOverlayClick}>
-      <div className="absolute inset-0 bg-black/40" />
-      <div className="absolute inset-0 flex items-start justify-center p-4 sm:p-6">
-        <div className="w-full max-w-lg rounded-lg bg-white shadow-lg ring-1 ring-black/5" dir="rtl">
-          <div className="px-5 pt-5 pb-3">
-            <h2 className="text-lg font-semibold text-gray-900">{member ? "تعديل بيانات الطالب" : "إضافة طالب جديد"}</h2>
-            <p className="mt-1 text-sm text-gray-600">{member ? "قم بتحديث بيانات الطالب" : "أدخل بيانات الطالب الجديد"}</p>
-          </div>
+    <div 
+      className="fixed inset-0 z-50 animate-in fade-in duration-200" 
+      aria-modal="true" 
+      role="dialog" 
+      onClick={onOverlayClick}
+    >
+      {/* Enhanced Backdrop with Blur */}
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+      
+      {/* Modal Container */}
+      <div className="absolute inset-0 flex items-center justify-center p-4 sm:p-6">
+        <div 
+          className="w-full max-w-2xl rounded-2xl bg-white/95 backdrop-blur-xl shadow-2xl border-2 border-blue-200/50 animate-in zoom-in-95 duration-300" 
+          dir="rtl"
+        >
+          {/* Modern Header with Gradient */}
+          <div className="relative bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 rounded-t-2xl px-6 pt-6 pb-8">
+            {/* Close Button */}
+            <button
+              type="button"
+              onClick={() => onOpenChange(false)}
+              className="absolute left-4 top-4 p-2 rounded-xl bg-white/20 hover:bg-white/30 text-white transition-all hover:scale-110"
+              aria-label="إغلاق"
+            >
+              <X className="h-5 w-5" />
+            </button>
 
-          <form onSubmit={handleSubmit} className="px-5 pb-5 space-y-6">
-            <div className="grid gap-5">
-              <div className="space-y-2">
-                <label htmlFor="name" className="block text-sm font-medium text-gray-700">الاسم *</label>
-                <input id="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="اسم الطالب" required className="h-10 w-full rounded-md border border-gray-300 bg-white px-3 text-gray-900 placeholder-gray-400 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20" />
-              </div>
-
-              <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700">أرقام الهاتف</label>
-
-                {phones.length > 0 && (
-                  <div className="flex flex-wrap gap-2">
-                    {phones.map((p, idx) => (
-                      <span key={idx} className="inline-flex items-center rounded-full border bg-gray-50 text-gray-700 px-3 py-1 text-sm">
-                        {p}
-                        <button
-                          type="button"
-                          onClick={() => setPhones(phones.filter((_, i) => i !== idx))}
-                          className="mr-2 inline-flex items-center justify-center rounded hover:text-red-600"
-                          aria-label="حذف الرقم"
-                          title="حذف الرقم"
-                        >
-                          ✕
-                        </button>
-                      </span>
-                    ))}
-                  </div>
+            {/* Header Content */}
+            <div className="flex items-center gap-4">
+              <div className="w-16 h-16 bg-white/20 backdrop-blur-lg rounded-2xl flex items-center justify-center border-2 border-white/30 shadow-lg">
+                {member ? (
+                  <UserCheck className="w-8 h-8 text-white" />
+                ) : (
+                  <UserPlus className="w-8 h-8 text-white" />
                 )}
-
-                <div className="flex gap-2 flex-row-reverse">
-                  <input
-                    className="h-10 flex-1 w-full rounded-md border border-gray-300 bg-white px-3 text-gray-900 placeholder-gray-400 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-                    value={phoneDraft}
-                    onChange={(e) => setPhoneDraft(e.target.value)}
-                    onKeyDown={handlePhoneDraftKeyDown}
-                    placeholder="01234567890"
-                    type="tel"
-                  />
-                  <button type="button" onClick={addPhoneFromDraft} className="h-10 px-4 min-w-[88px] rounded-md border border-gray-300 bg-white text-gray-900 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500/20">
-                    إضافة
-                  </button>
-                </div>
-
-                <p className="text-xs text-gray-500 text-end">اضغط Enter لإضافة الرقم. يمكنك إضافة أكثر من رقم.</p>
               </div>
-
-              <div className="space-y-2">
-                <label htmlFor="notes" className="block text-sm font-medium text-gray-700">ملاحظات</label>
-                <textarea
-                  id="notes"
-                  value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
-                  placeholder="ملاحظات إضافية..."
-                  rows={3}
-                  className="min-h-[96px] w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 placeholder-gray-400 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-                />
+              <div>
+                <h2 className="text-2xl font-black text-white">
+                  {member ? "تعديل بيانات الطالب" : "إضافة طالب جديد"}
+                </h2>
+                <p className="text-sm text-white/90 font-medium mt-1">
+                  {member ? "قم بتحديث المعلومات أدناه" : "أدخل بيانات الطالب الجديد"}
+                </p>
               </div>
             </div>
+          </div>
 
-            <div className="flex gap-3 justify-end pt-2">
-              <button type="button" onClick={() => onOpenChange(false)} className="h-10 px-4 rounded-md border border-gray-300 bg-white text-gray-900 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500/20">
+          {/* Form Content */}
+          <form onSubmit={handleSubmit} className="px-6 py-6 space-y-6">
+            {/* Name Input */}
+            <div className="space-y-2">
+              <label htmlFor="name" className="flex items-center gap-2 text-sm font-bold text-gray-700">
+                <Sparkles className="h-4 w-4 text-blue-600" />
+                الاسم الكامل <span className="text-red-500">*</span>
+              </label>
+              <input 
+                id="name" 
+                value={name} 
+                onChange={(e) => setName(e.target.value)} 
+                placeholder="أدخل اسم الطالب..."
+                required 
+                className="h-12 w-full rounded-xl border-2 border-gray-300 bg-white px-4 text-base text-gray-900 placeholder-gray-400 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200 transition-all" 
+              />
+            </div>
+
+            {/* Phone Numbers Section */}
+            <div className="space-y-3">
+              <label className="flex items-center gap-2 text-sm font-bold text-gray-700">
+                <Phone className="h-4 w-4 text-green-600" />
+                أرقام الهاتف
+              </label>
+
+              {/* Phone Tags */}
+              {phones.length > 0 && (
+                <div className="flex flex-wrap gap-2 p-3 bg-gradient-to-br from-gray-50 to-blue-50 rounded-xl border-2 border-gray-200">
+                  {phones.map((p, idx) => (
+                    <span 
+                      key={idx} 
+                      className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 py-2 text-sm font-bold shadow-md hover:shadow-lg transition-all"
+                    >
+                      <Phone className="h-3 w-3" />
+                      {p}
+                      <button
+                        type="button"
+                        onClick={() => setPhones(phones.filter((_, i) => i !== idx))}
+                        className="mr-1 inline-flex items-center justify-center w-5 h-5 rounded-full bg-white/20 hover:bg-white/30 transition-all hover:scale-110"
+                        aria-label="حذف الرقم"
+                        title="حذف الرقم"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              )}
+
+              {/* Add Phone Input */}
+              <div className="flex gap-2 flex-row-reverse">
+                <input
+                  className="h-12 flex-1 w-full rounded-xl border-2 border-gray-300 bg-white px-4 text-base text-gray-900 placeholder-gray-400 shadow-sm focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-200 transition-all"
+                  value={phoneDraft}
+                  onChange={(e) => setPhoneDraft(e.target.value)}
+                  onKeyDown={handlePhoneDraftKeyDown}
+                  placeholder="01234567890"
+                  type="tel"
+                />
+                <button 
+                  type="button" 
+                  onClick={addPhoneFromDraft} 
+                  className="h-12 px-6 rounded-xl bg-gradient-to-r from-green-600 to-emerald-600 text-white font-bold hover:from-green-700 hover:to-emerald-700 focus:outline-none focus:ring-2 focus:ring-green-500/50 shadow-md hover:shadow-lg transition-all flex items-center gap-2"
+                >
+                  <Plus className="h-4 w-4" />
+                  إضافة
+                </button>
+              </div>
+
+              <p className="text-xs text-gray-500 text-end bg-blue-50 px-3 py-2 rounded-lg border border-blue-200">
+                💡 اضغط <kbd className="px-2 py-1 bg-white rounded border border-gray-300 text-xs font-mono">Enter</kbd> لإضافة الرقم سريعاً
+              </p>
+            </div>
+
+            {/* Notes Section */}
+            <div className="space-y-2">
+              <label htmlFor="notes" className="flex items-center gap-2 text-sm font-bold text-gray-700">
+                <StickyNote className="h-4 w-4 text-amber-600" />
+                ملاحظات إضافية
+              </label>
+              <textarea
+                id="notes"
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                placeholder="أضف أي ملاحظات هنا..."
+                rows={4}
+                className="w-full rounded-xl border-2 border-gray-300 bg-white px-4 py-3 text-base text-gray-900 placeholder-gray-400 shadow-sm focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-200 resize-none transition-all"
+              />
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex gap-3 justify-end pt-4 border-t-2 border-gray-200">
+              <button 
+                type="button" 
+                onClick={() => onOpenChange(false)} 
+                className="h-12 px-6 rounded-xl border-2 border-gray-300 bg-white text-gray-700 font-bold hover:bg-gray-50 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-300 transition-all"
+              >
                 إلغاء
               </button>
-              <button type="submit" className="h-10 px-5 rounded-md bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500/30">
-                {member ? "حفظ التعديلات" : "إضافة"}
+              <button 
+                type="submit" 
+                className="h-12 px-8 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white font-black hover:from-blue-700 hover:via-indigo-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-blue-500/50 shadow-lg hover:shadow-xl transition-all flex items-center gap-2"
+              >
+                {member ? (
+                  <>
+                    <UserCheck className="h-5 w-5" />
+                    حفظ التعديلات
+                  </>
+                ) : (
+                  <>
+                    <Plus className="h-5 w-5" />
+                    إضافة الطالب
+                  </>
+                )}
               </button>
             </div>
           </form>

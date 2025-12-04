@@ -192,8 +192,8 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         )}
 
         {/* Main Content with Better Spacing */}
-        <main className="flex-1 p-4 lg:p-6">
-          <div className="max-w-6xl mx-auto w-full">
+        <main className="flex-1 p-4 lg:p-6 overflow-x-hidden">
+          <div className="max-w-7xl mx-auto w-full">
             {children}
           </div>
         </main>

@@ -3,6 +3,7 @@ import type { Metadata } from "next"
 import { IBM_Plex_Sans_Arabic } from "next/font/google"
 import "./globals.css"
 import PWARegister from "../components/pwa-register"
+import { QueryProvider } from "@/components/query-provider"
 
 const ibmPlexArabic = IBM_Plex_Sans_Arabic({
   subsets: ["arabic"],
@@ -38,7 +39,7 @@ export default function RootLayout({
     <html lang="ar" dir="rtl" className={ibmPlexArabic.variable}>
       <body className="antialiased">
         <PWARegister />
-        {children}
+        <QueryProvider>{children}</QueryProvider>
       </body>
     </html>
   )

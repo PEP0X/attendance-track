@@ -10,6 +10,7 @@ interface Member {
   name: string
   phones: string[] | null
   notes: string | null
+  deacon_rank?: string | null
 }
 
 interface StudentDialogProps {
@@ -129,96 +130,115 @@ export function StudentDialog({ open, onOpenChange, member, onSave }: StudentDia
 
           {/* Form Content */}
           <form onSubmit={handleSubmit} className="px-6 py-6 space-y-6">
-            {/* Name Input */}
-            <div className="space-y-2">
-              <label htmlFor="name" className="flex items-center gap-2 text-sm font-bold text-gray-700">
-                <Sparkles className="h-4 w-4 text-blue-600" />
-                الاسم الكامل <span className="text-red-500">*</span>
-              </label>
-              <input 
-                id="name" 
-                value={name} 
-                onChange={(e) => setName(e.target.value)} 
-                placeholder="أدخل اسم الطالب..."
-                required 
-                className="h-12 w-full rounded-xl border-2 border-gray-300 bg-white px-4 text-base text-gray-900 placeholder-gray-400 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200 transition-all" 
-              />
-            </div>
-
-            {/* Phone Numbers Section */}
-            <div className="space-y-3">
-              <label className="flex items-center gap-2 text-sm font-bold text-gray-700">
-                <Phone className="h-4 w-4 text-green-600" />
-                أرقام الهاتف
-              </label>
-
-              {/* Phone Tags */}
-              {phones.length > 0 && (
-                <div className="flex flex-wrap gap-2 p-3 bg-gradient-to-br from-gray-50 to-blue-50 rounded-xl border-2 border-gray-200">
-                  {phones.map((p, idx) => (
-                    <span 
-                      key={idx} 
-                      className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 py-2 text-sm font-bold shadow-md hover:shadow-lg transition-all"
-                    >
-                      <Phone className="h-3 w-3" />
-                      {p}
-                      <button
-                        type="button"
-                        onClick={() => setPhones(phones.filter((_, i) => i !== idx))}
-                        className="mr-1 inline-flex items-center justify-center w-5 h-5 rounded-full bg-white/20 hover:bg-white/30 transition-all hover:scale-110"
-                        aria-label="حذف الرقم"
-                        title="حذف الرقم"
-                      >
-                        <X className="h-3 w-3" />
-                      </button>
-                    </span>
-                  ))}
+            <div className="grid gap-6 md:grid-cols-2">
+              <div className="space-y-6">
+                {/* Name Input */}
+                <div className="space-y-2">
+                  <label
+                    htmlFor="name"
+                    className="flex items-center gap-2 text-sm font-bold text-gray-700"
+                  >
+                    <Sparkles className="h-4 w-4 text-blue-600" />
+                    الاسم الكامل <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    id="name"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="أدخل اسم الطالب..."
+                    required
+                    className="h-12 w-full rounded-xl border-2 border-gray-300 bg-white px-4 text-base text-gray-900 placeholder-gray-400 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200 transition-all"
+                  />
                 </div>
-              )}
 
-              {/* Add Phone Input */}
-              <div className="flex gap-2 flex-row-reverse">
-                <input
-                  className="h-12 flex-1 w-full rounded-xl border-2 border-gray-300 bg-white px-4 text-base text-gray-900 placeholder-gray-400 shadow-sm focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-200 transition-all"
-                  value={phoneDraft}
-                  onChange={(e) => setPhoneDraft(e.target.value)}
-                  onKeyDown={handlePhoneDraftKeyDown}
-                  placeholder="01234567890"
-                  type="tel"
-                />
-                <button 
-                  type="button" 
-                  onClick={addPhoneFromDraft} 
-                  className="h-12 px-6 rounded-xl bg-gradient-to-r from-green-600 to-emerald-600 text-white font-bold hover:from-green-700 hover:to-emerald-700 focus:outline-none focus:ring-2 focus:ring-green-500/50 shadow-md hover:shadow-lg transition-all flex items-center gap-2"
-                >
-                  <Plus className="h-4 w-4" />
-                  إضافة
-                </button>
+                {/* Phone Numbers Section */}
+                <div className="space-y-3">
+                  <label className="flex items-center gap-2 text-sm font-bold text-gray-700">
+                    <Phone className="h-4 w-4 text-green-600" />
+                    أرقام الهاتف
+                    {phones.length > 0 && (
+                      <span className="text-[11px] font-normal text-gray-500">
+                        ({phones.length} رقم)
+                      </span>
+                    )}
+                  </label>
+
+                  {/* Phone Tags */}
+                  {phones.length > 0 && (
+                    <div className="flex flex-wrap gap-2 p-3 bg-gradient-to-br from-gray-50 to-blue-50 rounded-xl border-2 border-gray-200">
+                      {phones.map((p, idx) => (
+                        <span
+                          key={idx}
+                          className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-3 py-1.5 text-xs sm:text-sm font-bold shadow-md hover:shadow-lg transition-all"
+                        >
+                          <Phone className="h-3 w-3" />
+                          {p}
+                          <button
+                            type="button"
+                            onClick={() => setPhones(phones.filter((_, i) => i !== idx))}
+                            className="mr-1 inline-flex items-center justify-center w-5 h-5 rounded-full bg-white/20 hover:bg-white/30 transition-all hover:scale-110"
+                            aria-label="حذف الرقم"
+                            title="حذف الرقم"
+                          >
+                            <X className="h-3 w-3" />
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Add Phone Input */}
+                  <div className="flex gap-2 flex-row-reverse">
+                    <input
+                      className="h-12 flex-1 w-full rounded-xl border-2 border-gray-300 bg-white px-4 text-base text-gray-900 placeholder-gray-400 shadow-sm focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-200 transition-all"
+                      value={phoneDraft}
+                      onChange={(e) => setPhoneDraft(e.target.value)}
+                      onKeyDown={handlePhoneDraftKeyDown}
+                      placeholder="01234567890"
+                      type="tel"
+                    />
+                    <button
+                      type="button"
+                      onClick={addPhoneFromDraft}
+                      className="h-12 px-6 rounded-xl bg-gradient-to-r from-green-600 to-emerald-600 text-white font-bold hover:from-green-700 hover:to-emerald-700 focus:outline-none focus:ring-2 focus:ring-green-500/50 shadow-md hover:shadow-lg transition-all flex items-center gap-2"
+                    >
+                      <Plus className="h-4 w-4" />
+                      إضافة
+                    </button>
+                  </div>
+
+                  <p className="text-xs text-gray-500 text-end bg-blue-50 px-3 py-2 rounded-lg border border-blue-200">
+                    اضغط
+                    <kbd className="mx-1 px-2 py-1 bg-white rounded border border-gray-300 text-xs font-mono">
+                      Enter
+                    </kbd>
+                    لإضافة الرقم سريعاً
+                  </p>
+                </div>
               </div>
 
-              <p className="text-xs text-gray-500 text-end bg-blue-50 px-3 py-2 rounded-lg border border-blue-200">
-                💡 اضغط <kbd className="px-2 py-1 bg-white rounded border border-gray-300 text-xs font-mono">Enter</kbd> لإضافة الرقم سريعاً
-              </p>
-            </div>
-
-            {/* Notes Section */}
-            <div className="space-y-2">
-              <label htmlFor="notes" className="flex items-center gap-2 text-sm font-bold text-gray-700">
-                <StickyNote className="h-4 w-4 text-amber-600" />
-                ملاحظات إضافية
-              </label>
-              <textarea
-                id="notes"
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                placeholder="أضف أي ملاحظات هنا..."
-                rows={4}
-                className="w-full rounded-xl border-2 border-gray-300 bg-white px-4 py-3 text-base text-gray-900 placeholder-gray-400 shadow-sm focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-200 resize-none transition-all"
-              />
+              {/* Notes Section */}
+              <div className="space-y-2">
+                <label
+                  htmlFor="notes"
+                  className="flex items-center gap-2 text-sm font-bold text-gray-700"
+                >
+                  <StickyNote className="h-4 w-4 text-amber-600" />
+                  ملاحظات إضافية
+                </label>
+                <textarea
+                  id="notes"
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  placeholder="أضف أي ملاحظات مهمة عن الطالب (مثلاً: ظروف خاصة، تواصل مع الأهل، خدمة معينة...)"
+                  rows={6}
+                  className="w-full rounded-xl border-2 border-gray-300 bg-white px-4 py-3 text-base text-gray-900 placeholder-gray-400 shadow-sm focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-200 resize-none transition-all h-full min-h-[180px]"
+                />
+              </div>
             </div>
 
             {/* Action Buttons */}
-            <div className="flex gap-3 justify-end pt-4 border-t-2 border-gray-200">
+            <div className="flex gap-3 justify-end pt-4 border-t-2 border-gray-200 mt-2">
               <button 
                 type="button" 
                 onClick={() => onOpenChange(false)} 

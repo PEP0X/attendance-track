@@ -10,6 +10,7 @@ interface Member {
   name: string
   phones: string[] | null
   notes: string | null
+  deacon_rank?: string | null
 }
 
 interface StudentCardProps {

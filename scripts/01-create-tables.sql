@@ -4,6 +4,8 @@ CREATE TABLE IF NOT EXISTS members (
   name TEXT NOT NULL,
   -- New: support multiple phone numbers
   phones TEXT[],
+  -- New: deacon rank for each member (e.g. not_deacon, absalts, etc.)
+  deacon_rank TEXT,
   notes TEXT,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
@@ -18,6 +20,18 @@ BEGIN
     WHERE table_name = 'members' AND column_name = 'phones'
   ) THEN
     ALTER TABLE members ADD COLUMN phones TEXT[];
+  END IF;
+END $$;
+
+-- Ensure deacon_rank column exists on existing databases
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_name = 'members' AND column_name = 'deacon_rank'
+  ) THEN
+    ALTER TABLE members ADD COLUMN deacon_rank TEXT;
   END IF;
 END $$;
 

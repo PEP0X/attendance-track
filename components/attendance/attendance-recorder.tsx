@@ -1,14 +1,27 @@
-"use client";
+"use client"
 
-import { useState, useEffect, useMemo, useRef } from "react";
-import { getSupabaseBrowserClient } from "@/lib/supabase/client";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { useToast } from "@/components/ui/use-toast";
+import { useState, useEffect, useMemo, useRef } from "react"
+import { useQuery } from "@tanstack/react-query"
+import { getSupabaseBrowserClient } from "@/lib/supabase/client"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { useToast } from "@/components/ui/use-toast"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
+import {
+  flexRender,
+  getCoreRowModel,
+  type ColumnDef,
+  useReactTable,
+} from "@tanstack/react-table"
 import {
   CheckCircle2,
   XCircle,
@@ -19,102 +32,103 @@ import {
   Phone,
   FileText,
   RefreshCw,
-} from "lucide-react";
-import { cn } from "@/lib/utils";
-import { motion, AnimatePresence } from "framer-motion";
+} from "lucide-react"
+import { cn } from "@/lib/utils"
+import { motion, AnimatePresence } from "framer-motion"
 
 interface Member {
-  id: string;
-  name: string;
-  phones: string[] | null;
-  notes: string | null;
+  id: string
+  name: string
+  phones: string[] | null
+  notes: string | null
+  deacon_rank?: string | null
 }
 
 interface AttendanceRecord {
-  member_id: string;
-  status: "present" | "absent";
-  notes: string;
-  recorded_by?: string | null;
-  created_at?: string | null;
+  member_id: string
+  status: "present" | "absent"
+  notes: string
+  recorded_by?: string | null
+  created_at?: string | null
 }
 
 interface AttendanceRecorderProps {
-  initialMembers: Member[];
-  usersList: { id: string; name: string }[];
+  initialMembers: Member[]
+  usersList: { id: string; name: string }[]
+}
+
+interface AttendanceRow {
+  member: Member
+  record: AttendanceRecord | undefined
 }
 
 export function AttendanceRecorder({
   initialMembers,
   usersList,
 }: AttendanceRecorderProps) {
-  const [members, setMembers] = useState<Member[]>(initialMembers);
+  const [members, setMembers] = useState<Member[]>(initialMembers)
   const [attendance, setAttendance] = useState<
     Record<string, AttendanceRecord>
-  >({});
+  >({})
   const [selectedDate, setSelectedDate] = useState(
     new Date().toISOString().split("T")[0]
-  );
-  const [searchQuery, setSearchQuery] = useState("");
-  const [searchInput, setSearchInput] = useState("");
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
+  )
+  const [searchQuery, setSearchQuery] = useState("")
+  const [searchInput, setSearchInput] = useState("")
+  const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState<{
-    type: "success" | "error";
-    text: string;
-  } | null>(null);
-  const supabase = getSupabaseBrowserClient();
-  const { toast } = useToast();
-  const hasUnsavedChangesRef = useRef(false);
-  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+    type: "success" | "error"
+    text: string
+  } | null>(null)
+  const supabase = getSupabaseBrowserClient()
+  const { toast } = useToast()
+  const hasUnsavedChangesRef = useRef(false)
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null)
 
   // If initial props are empty, try fetching client-side as fallback
   useEffect(() => {
     if (initialMembers.length > 0) {
-      setMembers(initialMembers);
+      setMembers(initialMembers)
     } else {
       // Fallback fetch
-      void loadMembers();
+      void loadMembers()
     }
-  }, [initialMembers]);
+  }, [initialMembers])
 
   const loadMembers = async () => {
     try {
       const { data, error } = await supabase
         .from("members")
         .select("*")
-        .order("name", { ascending: true });
-      if (error) throw error;
-      setMembers(data || []);
+        .order("name", { ascending: true })
+      if (error) throw error
+      setMembers(data || [])
     } catch (err) {
-      console.error("Error loading members client-side fallback:", err);
+      console.error("Error loading members client-side fallback:", err)
     }
-  };
+  }
 
   // Debounce search input
   useEffect(() => {
-    const id = setTimeout(() => setSearchQuery(searchInput.trim()), 250);
-    return () => clearTimeout(id);
-  }, [searchInput]);
-
-  useEffect(() => {
-    loadAttendance();
-  }, [selectedDate]);
+    const id = setTimeout(() => setSearchQuery(searchInput.trim()), 250)
+    return () => clearTimeout(id)
+  }, [searchInput])
 
   // Load current user id for suppressing self toasts
   useEffect(() => {
     let mounted = true;
     (async () => {
       try {
-        const { data } = await supabase.auth.getUser();
-        if (mounted) setCurrentUserId(data.user?.id ?? null);
+        const { data } = await supabase.auth.getUser()
+        if (mounted) setCurrentUserId(data.user?.id ?? null)
       } catch {
-        if (mounted) setCurrentUserId(null);
+        if (mounted) setCurrentUserId(null)
       }
-    })();
+    })()
     return () => {
-      mounted = false;
-    };
-  }, [supabase]);
+      mounted = false
+    }
+  }, [supabase])
 
   // Realtime subscriptions for attendance (by selected date) and members
   useEffect(() => {
@@ -132,13 +146,13 @@ export function AttendanceRecorder({
           const eventType = payload.eventType as "INSERT" | "UPDATE" | "DELETE";
           if (eventType === "INSERT" || eventType === "UPDATE") {
             const rec = payload.new as {
-              member_id: string;
-              status: "present" | "absent";
-              notes?: string | null;
-              date: string;
-              recorded_by?: string | null;
-              created_at?: string | null;
-            };
+              member_id: string
+              status: "present" | "absent"
+              notes?: string | null
+              date: string
+              recorded_by?: string | null
+              created_at?: string | null
+            }
             setAttendance((prev) => ({
               ...prev,
               [rec.member_id]: {
@@ -148,34 +162,34 @@ export function AttendanceRecorder({
                 recorded_by: rec.recorded_by ?? null,
                 created_at: rec.created_at ?? null,
               },
-            }));
+            }))
 
             const isSelfChange =
               rec.recorded_by &&
               currentUserId &&
-              rec.recorded_by === currentUserId;
+              rec.recorded_by === currentUserId
             if (!isSelfChange) {
               const memberName =
-                members.find((m) => m.id === rec.member_id)?.name || "طالب";
+                members.find((m) => m.id === rec.member_id)?.name || "طالب"
               const who =
                 usersList.find((u) => u.id === rec.recorded_by)?.name ||
-                "مستخدم";
+                "مستخدم"
               toast({
                 description: `${memberName}: ${
                   rec.status === "present" ? "حاضر" : "غائب"
                 } — بواسطة ${who}`,
-              });
+              })
             }
           } else if (eventType === "DELETE") {
-            const oldRec = payload.old as { member_id: string; date: string };
+            const oldRec = payload.old as { member_id: string; date: string }
             setAttendance((prev) => {
-              const next = { ...prev };
-              delete next[oldRec.member_id];
-              return next;
-            });
+              const next = { ...prev }
+              delete next[oldRec.member_id]
+              return next
+            })
             const memberName =
-              members.find((m) => m.id === oldRec.member_id)?.name || "طالب";
-            toast({ description: `تم إزالة سجل الحضور لـ ${memberName}` });
+              members.find((m) => m.id === oldRec.member_id)?.name || "طالب"
+            toast({ description: `تم إزالة سجل الحضور لـ ${memberName}` })
           }
         }
       )
@@ -184,17 +198,17 @@ export function AttendanceRecorder({
         "postgres_changes",
         { event: "*", schema: "public", table: "members" },
         (payload: any) => {
-          const eventType = payload.eventType as "INSERT" | "UPDATE" | "DELETE";
+          const eventType = payload.eventType as "INSERT" | "UPDATE" | "DELETE"
           if (eventType === "INSERT") {
-            const m = payload.new as Member;
+            const m = payload.new as Member
             setMembers((prev) =>
               [...prev, m].sort((a, b) =>
                 a.name.localeCompare(b.name, undefined, { sensitivity: "base" })
               )
-            );
-            toast({ description: `تم إضافة طالب جديد: ${m.name}` });
+            )
+            toast({ description: `تم إضافة طالب جديد: ${m.name}` })
           } else if (eventType === "UPDATE") {
-            const m = payload.new as Member;
+            const m = payload.new as Member
             setMembers((prev) =>
               prev
                 .map((x) => (x.id === m.id ? m : x))
@@ -203,36 +217,41 @@ export function AttendanceRecorder({
                     sensitivity: "base",
                   })
                 )
-            );
+            )
           } else if (eventType === "DELETE") {
-            const m = payload.old as { id: string };
-            setMembers((prev) => prev.filter((x) => x.id !== m.id));
+            const m = payload.old as { id: string }
+            setMembers((prev) => prev.filter((x) => x.id !== m.id))
             setAttendance((prev) => {
-              const next = { ...prev };
-              delete next[m.id];
-              return next;
-            });
+              const next = { ...prev }
+              delete next[m.id]
+              return next
+            })
           }
         }
       )
-      .subscribe();
+      .subscribe()
 
     return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [selectedDate, supabase, currentUserId, members, toast, usersList]);
+      supabase.removeChannel(channel)
+    }
+  }, [selectedDate, supabase, currentUserId, members, toast, usersList])
 
-  const loadAttendance = async () => {
-    try {
-      setLoading(true);
+  const {
+    isLoading: attendanceLoading,
+    isFetching: attendanceFetching,
+  } = useQuery({
+    queryKey: ["attendance", selectedDate],
+    queryFn: async () => {
       const { data, error } = await supabase
         .from("attendance")
         .select("*")
-        .eq("date", selectedDate);
+        .eq("date", selectedDate)
 
-      if (error) throw error;
+      if (error) {
+        throw error
+      }
 
-      const attendanceMap: Record<string, AttendanceRecord> = {};
+      const attendanceMap: Record<string, AttendanceRecord> = {}
       data?.forEach((record: any) => {
         attendanceMap[record.member_id] = {
           member_id: record.member_id,
@@ -240,45 +259,44 @@ export function AttendanceRecorder({
           notes: record.notes || "",
           recorded_by: record.recorded_by ?? null,
           created_at: record.created_at ?? null,
-        };
-      });
-      setAttendance(attendanceMap);
-    } catch (err) {
-      console.error("Error loading attendance:", err);
-      toast({ variant: "destructive", description: "فشل تحميل بيانات الحضور" });
-    } finally {
-      setLoading(false);
-    }
-  };
+        }
+      })
+      setAttendance(attendanceMap)
+      return attendanceMap
+    },
+    onError: () => {
+      toast({ variant: "destructive", description: "فشل تحميل بيانات الحضور" })
+    },
+  })
 
   const toggleAttendance = async (
     memberId: string,
     status: "present" | "absent"
   ) => {
-    const currentRecord = attendance[memberId];
+    const currentRecord = attendance[memberId]
     // If same status is clicked, toggle it off (remove record)
-    const isRemoving = currentRecord?.status === status;
+    const isRemoving = currentRecord?.status === status
 
     if (isRemoving) {
       setAttendance((prev) => {
-        const next = { ...prev };
-        delete next[memberId];
-        return next;
-      });
-      hasUnsavedChangesRef.current = true;
+        const next = { ...prev }
+        delete next[memberId]
+        return next
+      })
+      hasUnsavedChangesRef.current = true
 
       try {
         // Remove from DB immediately
         const { error } = await supabase
           .from("attendance")
           .delete()
-          .match({ member_id: memberId, date: selectedDate });
+          .match({ member_id: memberId, date: selectedDate })
 
-        if (error) throw error;
+        if (error) throw error
       } catch (err) {
         // Revert optimistic update on error
-        setAttendance((prev) => ({ ...prev, [memberId]: currentRecord }));
-        toast({ variant: "destructive", description: "فشل إلغاء الحالة" });
+        setAttendance((prev) => ({ ...prev, [memberId]: currentRecord }))
+        toast({ variant: "destructive", description: "فشل إلغاء الحالة" })
       }
     } else {
       // Set new status
@@ -290,13 +308,13 @@ export function AttendanceRecorder({
           notes: prev[memberId]?.notes || "",
           recorded_by: currentUserId ?? prev[memberId]?.recorded_by ?? null,
         },
-      }));
+      }))
 
       try {
         const {
           data: { user },
-        } = await supabase.auth.getUser();
-        const actorId = user?.id ?? null;
+        } = await supabase.auth.getUser()
+        const actorId = user?.id ?? null
 
         const payload = {
           member_id: memberId,
@@ -304,19 +322,19 @@ export function AttendanceRecorder({
           status,
           notes: attendance[memberId]?.notes || null,
           recorded_by: actorId,
-        };
+        }
 
         const { error } = await supabase
           .from("attendance")
-          .upsert(payload, { onConflict: "member_id,date" });
-        if (error) throw error;
-        hasUnsavedChangesRef.current = false;
+          .upsert(payload, { onConflict: "member_id,date" })
+        if (error) throw error
+        hasUnsavedChangesRef.current = false
       } catch (err) {
-        setAttendance((prev) => ({ ...prev })); // Force re-render / revert if needed logic
-        toast({ variant: "destructive", description: "فشل حفظ الحالة" });
+        setAttendance((prev) => ({ ...prev })) // Force re-render / revert if needed logic
+        toast({ variant: "destructive", description: "فشل حفظ الحالة" })
       }
     }
-  };
+  }
 
   const updateNotes = (memberId: string, notes: string) => {
     setAttendance((prev) => ({
@@ -327,47 +345,47 @@ export function AttendanceRecorder({
         status: prev[memberId]?.status || "absent",
         notes,
       },
-    }));
-    hasUnsavedChangesRef.current = true;
-  };
+    }))
+    hasUnsavedChangesRef.current = true
+  }
 
   const saveAttendance = async () => {
-    if (Object.keys(attendance).length === 0) return;
+    if (Object.keys(attendance).length === 0) return
     const proceed = window.confirm(
       "سيتم استبدال سجلات هذا التاريخ. هل تريد المتابعة؟"
-    );
-    if (!proceed) return;
-    setSaving(true);
-    setMessage(null);
+    )
+    if (!proceed) return
+    setSaving(true)
+    setMessage(null)
 
     try {
       const {
         data: { user },
-      } = await supabase.auth.getUser();
-      if (!user) throw new Error("User not authenticated");
+      } = await supabase.auth.getUser()
+      if (!user) throw new Error("User not authenticated")
 
       const records = Object.values(attendance).map((record) => ({
         member_id: record.member_id,
         date: selectedDate,
         status: record.status,
         notes: record.notes || null,
-      }));
+      }))
 
       const { error } = await supabase
         .from("attendance")
-        .upsert(records, { onConflict: "member_id,date" });
+        .upsert(records, { onConflict: "member_id,date" })
 
-      if (error) throw error;
+      if (error) throw error
 
-      setMessage({ type: "success", text: "تم حفظ الحضور بنجاح" });
-      hasUnsavedChangesRef.current = false;
-      toast({ description: "تم الحفظ بنجاح" });
+      setMessage({ type: "success", text: "تم حفظ الحضور بنجاح" })
+      hasUnsavedChangesRef.current = false
+      toast({ description: "تم الحفظ بنجاح" })
     } catch (err: any) {
-      setMessage({ type: "error", text: err.message || "فشل حفظ الحضور" });
+      setMessage({ type: "error", text: err.message || "فشل حفظ الحضور" })
     } finally {
-      setSaving(false);
+      setSaving(false)
     }
-  };
+  }
 
   const filteredMembers = useMemo(
     () =>
@@ -375,74 +393,74 @@ export function AttendanceRecorder({
         member.name.toLowerCase().includes(searchQuery.toLowerCase())
       ),
     [members, searchQuery]
-  );
+  )
 
   const bulkMark = (status: "present" | "absent") => {
-    if (filteredMembers.length === 0) return;
+    if (filteredMembers.length === 0) return
     setAttendance((prev) => {
-      const next = { ...prev };
+      const next = { ...prev }
       filteredMembers.forEach((m) => {
         next[m.id] = {
           member_id: m.id,
           status,
           notes: next[m.id]?.notes || "",
-        };
-      });
-      return next;
-    });
-    hasUnsavedChangesRef.current = true;
-  };
+        }
+      })
+      return next
+    })
+    hasUnsavedChangesRef.current = true
+  }
 
   const bulkReset = () => {
-    if (filteredMembers.length === 0) return;
+    if (filteredMembers.length === 0) return
     setAttendance((prev) => {
-      const next = { ...prev };
+      const next = { ...prev }
       filteredMembers.forEach((m) => {
-        delete next[m.id];
-      });
-      return next;
-    });
-    hasUnsavedChangesRef.current = true;
-  };
+        delete next[m.id]
+      })
+      return next
+    })
+    hasUnsavedChangesRef.current = true
+  }
 
   const markUnselectedAsAbsent = () => {
-    if (filteredMembers.length === 0) return;
+    if (filteredMembers.length === 0) return
     setAttendance((prev) => {
-      const next = { ...prev };
+      const next = { ...prev }
       filteredMembers.forEach((m) => {
         if (!next[m.id]) {
-          next[m.id] = { member_id: m.id, status: "absent", notes: "" };
+          next[m.id] = { member_id: m.id, status: "absent", notes: "" }
         }
-      });
-      return next;
-    });
-    hasUnsavedChangesRef.current = true;
-  };
+      })
+      return next
+    })
+    hasUnsavedChangesRef.current = true
+  }
 
   useEffect(() => {
     const beforeUnload = (e: BeforeUnloadEvent) => {
       if (hasUnsavedChangesRef.current) {
-        e.preventDefault();
-        e.returnValue = "";
+        e.preventDefault()
+        e.returnValue = ""
       }
-    };
-    window.addEventListener("beforeunload", beforeUnload);
-    return () => window.removeEventListener("beforeunload", beforeUnload);
-  }, []);
+    }
+    window.addEventListener("beforeunload", beforeUnload)
+    return () => window.removeEventListener("beforeunload", beforeUnload)
+  }, [])
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const isSave = (e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "s";
       if (isSave) {
-        e.preventDefault();
+        e.preventDefault()
         if (!saving && Object.keys(attendance).length > 0) {
-          void saveAttendance();
+          void saveAttendance()
         }
       }
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [saving, attendance]);
+    }
+    window.addEventListener("keydown", onKey)
+    return () => window.removeEventListener("keydown", onKey)
+  }, [saving, attendance])
 
   const stats = {
     total: members.length,
@@ -450,7 +468,129 @@ export function AttendanceRecorder({
       .length,
     absent: Object.values(attendance).filter((a) => a.status === "absent")
       .length,
-  };
+  }
+
+  const tableData: AttendanceRow[] = useMemo(
+    () =>
+      filteredMembers.map((member) => ({
+        member,
+        record: attendance[member.id],
+      })),
+    [filteredMembers, attendance],
+  )
+
+  const columns = useMemo<ColumnDef<AttendanceRow>[]>(
+    () => [
+      {
+        id: "member",
+        header: () => <span>الطالب</span>,
+        cell: ({ row }) => {
+          const member = row.original.member
+          return (
+            <div className="flex flex-col gap-1">
+              <span className="font-semibold text-gray-900">{member.name}</span>
+              <div className="flex flex-wrap items-center gap-2 text-xs text-gray-500">
+                {member.phones && member.phones.length > 0 && (
+                  <div className="inline-flex items-center gap-1">
+                    <Phone className="w-3 h-3" />
+                    <span>{member.phones[0]}</span>
+                    {member.phones.length > 1 && (
+                      <span className="bg-gray-100 px-1 rounded text-[10px]">
+                        +{member.phones.length - 1}
+                      </span>
+                    )}
+                  </div>
+                )}
+                {member.notes && (
+                  <span className="inline-flex items-center gap-1 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-100 text-amber-700">
+                    <FileText className="w-3 h-3" />
+                    <span className="line-clamp-1">{member.notes}</span>
+                  </span>
+                )}
+              </div>
+            </div>
+          )
+        },
+      },
+      {
+        id: "status",
+        header: () => <span>الحالة</span>,
+        cell: ({ row }) => {
+          const record = row.original.record
+          const isPresent = record?.status === "present"
+          const isAbsent = record?.status === "absent"
+          const memberId = row.original.member.id
+          return (
+            <div className="flex items-center gap-2">
+              <Button
+                onClick={() => toggleAttendance(memberId, "present")}
+                variant="ghost"
+                className={cn(
+                  "flex-1 rounded-xl border-2 h-10 font-bold text-sm px-3",
+                  isPresent
+                    ? "bg-emerald-500 border-emerald-500 text-white shadow-emerald-200 shadow-md"
+                    : "bg-white border-emerald-100 text-emerald-600 hover:bg-emerald-50 hover:border-emerald-200",
+                )}
+              >
+                <CheckCircle2 className="w-4 h-4 ml-1.5" />
+                حاضر
+              </Button>
+              <Button
+                onClick={() => toggleAttendance(memberId, "absent")}
+                variant="ghost"
+                className={cn(
+                  "flex-1 rounded-xl border-2 h-10 font-bold text-sm px-3",
+                  isAbsent
+                    ? "bg-rose-500 border-rose-500 text-white shadow-rose-200 shadow-md"
+                    : "bg-white border-rose-100 text-rose-600 hover:bg-rose-50 hover:border-rose-200",
+                )}
+              >
+                <XCircle className="w-4 h-4 ml-1.5" />
+                غائب
+              </Button>
+            </div>
+          )
+        },
+        size: 260,
+      },
+      {
+        id: "notes",
+        header: () => <span>ملاحظات الحضور</span>,
+        cell: ({ row }) => {
+          const memberId = row.original.member.id
+          const record = row.original.record
+          const recordedByName =
+            record?.recorded_by &&
+            usersList.find((u) => u.id === record.recorded_by)?.name
+
+          return (
+            <div className="flex flex-col gap-1">
+              <Textarea
+                value={record?.notes ?? ""}
+                onChange={(e) => updateNotes(memberId, e.target.value)}
+                placeholder="ملاحظات إضافية..."
+                className="min-h-[52px] bg-white/70 border-0 ring-1 ring-gray-200 focus:ring-2 focus:ring-indigo-500 rounded-xl resize-none text-sm"
+              />
+              {recordedByName && (
+                <div className="flex items-center justify-end gap-1 text-[10px] text-gray-400 font-medium">
+                  <span>بواسطة {recordedByName}</span>
+                </div>
+              )}
+            </div>
+          )
+        },
+      },
+    ],
+    [toggleAttendance, updateNotes, usersList],
+  )
+
+  const table = useReactTable({
+    data: tableData,
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+  })
+
+  const isLoadingTable = attendanceLoading || attendanceFetching
 
   return (
     <div className="relative pb-32">
@@ -570,158 +710,77 @@ export function AttendanceRecorder({
         </motion.div>
       )}
 
-      {/* Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
-        <AnimatePresence mode="popLayout">
-          {filteredMembers.length === 0 && !loading && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="col-span-full flex flex-col items-center justify-center py-16 text-center"
-            >
-              <div className="bg-gray-50 p-6 rounded-full mb-4">
-                <Search className="h-10 w-10 text-gray-300" />
-              </div>
-              <p className="text-xl font-semibold text-gray-600">
-                لا توجد نتائج
-              </p>
-              <p className="text-gray-400 mt-2">حاول البحث باسم آخر</p>
-            </motion.div>
-          )}
-
-          {loading && filteredMembers.length === 0 && (
-            <div className="col-span-full flex justify-center py-20">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+      {/* Modern Table Dashboard */}
+      <div className="mt-4 bg-white/80 backdrop-blur-xl border border-white/60 shadow-xl rounded-3xl overflow-hidden">
+        {tableData.length === 0 && !isLoadingTable ? (
+          <div className="flex flex-col items-center justify-center py-16 text-center">
+            <div className="bg-gray-50 p-6 rounded-full mb-4">
+              <Search className="h-10 w-10 text-gray-300" />
             </div>
-          )}
-
-          {filteredMembers.map((member) => {
-            const record = attendance[member.id];
-            const isPresent = record?.status === "present";
-            const isAbsent = record?.status === "absent";
-
-            return (
-              <motion.div
-                layout
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                transition={{ duration: 0.2 }}
-                key={member.id}
-              >
-                <Card
-                  className={cn(
-                    "h-full border-0 shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden group rounded-3xl ring-1",
-                    isPresent
-                      ? "bg-gradient-to-br from-emerald-50 to-white ring-emerald-200"
-                      : isAbsent
-                      ? "bg-gradient-to-br from-rose-50 to-white ring-rose-200"
-                      : "bg-white ring-gray-200 hover:ring-indigo-200"
-                  )}
-                >
-                  <CardContent className="p-5 h-full flex flex-col">
-                    <div className="flex justify-between items-start gap-3 mb-4">
-                      <div className="flex-1 min-w-0">
-                        <h3 className="font-bold text-lg text-gray-800 leading-tight group-hover:text-indigo-700 transition-colors">
-                          {member.name}
-                        </h3>
-                        <div className="flex flex-col gap-1 mt-2">
-                          {member.phones && member.phones.length > 0 && (
-                            <div className="flex items-center gap-1.5 text-xs text-gray-500 font-medium">
-                              <Phone className="w-3 h-3" />
-                              <span>{member.phones[0]}</span>
-                              {member.phones.length > 1 && (
-                                <span className="bg-gray-100 px-1 rounded text-[10px]">
-                                  +{member.phones.length - 1}
-                                </span>
-                              )}
-                            </div>
-                          )}
-                          {member.notes && (
-                            <div className="flex items-start gap-1.5 text-xs text-amber-600 bg-amber-50 px-2 py-1 rounded-lg self-start mt-1 border border-amber-100">
-                              <FileText className="w-3 h-3 mt-0.5 flex-shrink-0" />
-                              <span className="line-clamp-1">
-                                {member.notes}
-                              </span>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-3 mb-4">
-                      <Button
-                        onClick={() => toggleAttendance(member.id, "present")}
-                        variant="ghost"
-                        className={cn(
-                          "flex-1 rounded-xl border-2 h-12 font-bold transition-all duration-300",
-                          isPresent
-                            ? "bg-emerald-500 border-emerald-500 text-white shadow-emerald-200 shadow-lg"
-                            : "bg-white border-emerald-100 text-emerald-600 hover:bg-emerald-50 hover:border-emerald-200"
-                        )}
-                      >
-                        <CheckCircle2 className={cn("w-5 h-5 ml-1.5")} />
-                        حاضر
-                      </Button>
-                      <Button
-                        onClick={() => toggleAttendance(member.id, "absent")}
-                        variant="ghost"
-                        className={cn(
-                          "flex-1 rounded-xl border-2 h-12 font-bold transition-all duration-300",
-                          isAbsent
-                            ? "bg-rose-500 border-rose-500 text-white shadow-rose-200 shadow-lg"
-                            : "bg-white border-rose-100 text-rose-600 hover:bg-rose-50 hover:border-rose-200"
-                        )}
-                      >
-                        <XCircle className={cn("w-5 h-5 ml-1.5")} />
-                        غائب
-                      </Button>
-                    </div>
-
-                    {/* Notes Expandable Area */}
-                    <div className="mt-auto">
-                      <AnimatePresence>
-                        {record && (
-                          <motion.div
-                            initial={{ height: 0, opacity: 0 }}
-                            animate={{ height: "auto", opacity: 1 }}
-                            exit={{ height: 0, opacity: 0 }}
-                            className="overflow-hidden"
+            <p className="text-xl font-semibold text-gray-600">لا توجد نتائج</p>
+            <p className="text-gray-400 mt-2">حاول البحث باسم آخر</p>
+          </div>
+        ) : (
+          <>
+            <div className="relative">
+              {isLoadingTable && (
+                <div className="absolute inset-0 bg-white/60 backdrop-blur-sm flex items-center justify-center z-10">
+                  <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-indigo-600" />
+                </div>
+              )}
+              <div className="overflow-x-auto">
+                <Table className="min-w-full">
+                  <TableHeader className="bg-gradient-to-l from-indigo-50 to-blue-50">
+                    {table.getHeaderGroups().map((headerGroup) => (
+                      <TableRow key={headerGroup.id}>
+                        {headerGroup.headers.map((header) => (
+                          <TableHead
+                            key={header.id}
+                            className={cn(
+                              "text-right text-xs sm:text-sm font-semibold text-gray-700 py-3 px-3 sm:px-4 whitespace-nowrap",
+                            )}
+                            style={{
+                              width: header.getSize()
+                                ? `${header.getSize()}px`
+                                : undefined,
+                            }}
                           >
-                            <div className="pt-3 border-t border-gray-100/50">
-                              <div className="relative">
-                                <Textarea
-                                  value={record.notes}
-                                  onChange={(e) =>
-                                    updateNotes(member.id, e.target.value)
-                                  }
-                                  placeholder="ملاحظات إضافية..."
-                                  className="min-h-[60px] bg-white/50 border-0 ring-1 ring-gray-200 focus:ring-2 focus:ring-indigo-500 rounded-xl resize-none text-sm"
-                                />
-                              </div>
-                              {(record.recorded_by || record.created_at) && (
-                                <div className="mt-2 flex items-center justify-end gap-2 text-[10px] text-gray-400 font-medium">
-                                  {record.recorded_by && (
-                                    <span>
-                                      بواسطة{" "}
-                                      {usersList.find(
-                                        (u) => u.id === record.recorded_by
-                                      )?.name || "مستخدم"}
-                                    </span>
-                                  )}
-                                </div>
-                              )}
-                            </div>
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
-                    </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            );
-          })}
-        </AnimatePresence>
+                            {header.isPlaceholder
+                              ? null
+                              : flexRender(
+                                  header.column.columnDef.header,
+                                  header.getContext(),
+                                )}
+                          </TableHead>
+                        ))}
+                      </TableRow>
+                    ))}
+                  </TableHeader>
+                  <TableBody>
+                    {table.getRowModel().rows.map((row) => (
+                      <TableRow
+                        key={row.id}
+                        className="hover:bg-slate-50 transition-colors"
+                      >
+                        {row.getVisibleCells().map((cell) => (
+                          <TableCell
+                            key={cell.id}
+                            className="align-top py-3 px-3 sm:px-4 text-xs sm:text-sm"
+                          >
+                            {flexRender(
+                              cell.column.columnDef.cell,
+                              cell.getContext(),
+                            )}
+                          </TableCell>
+                        ))}
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </div>
+          </>
+        )}
       </div>
 
       {/* Floating Save Button */}
@@ -754,5 +813,5 @@ export function AttendanceRecorder({
         )}
       </AnimatePresence>
     </div>
-  );
+  )
 }

@@ -4,13 +4,18 @@ import { useState, useEffect } from "react";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Home, BarChart3, AlertTriangle, UserCheck } from "lucide-react";
+import { Home, BarChart3, AlertTriangle, UserCheck, FileText, FileSpreadsheet } from "lucide-react";
 import { AnalyticsHeader } from "./analytics-header";
 import { AnalyticsStats } from "./analytics-stats";
 import { OverviewTab } from "./tabs/overview-tab";
 import { AttendanceTab } from "./tabs/attendance-tab";
 import { RiskTab } from "./tabs/risk-tab";
 import { AttendanceRecord, Stats, AtRiskStudent } from "./types";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Input } from "@/components/ui/input";
+import { exportToExcel, exportToPDF } from "@/lib/export-utils";
 
 export function ReportsAnalytics() {
   const [attendance, setAttendance] = useState<AttendanceRecord[]>([]);
@@ -29,6 +34,19 @@ export function ReportsAnalytics() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const supabase = getSupabaseBrowserClient();
+
+  const [nonDeacons, setNonDeacons] = useState<
+    { id: string; name: string; phones: string[] | null; notes: string | null }[]
+  >([]);
+  const [nonDeaconsLoading, setNonDeaconsLoading] = useState(false);
+  const [nonDeaconsSearch, setNonDeaconsSearch] = useState("");
+  const nonDeaconsFiltered = nonDeacons.filter((m) => {
+    const q = nonDeaconsSearch.trim().toLowerCase();
+    if (!q) return true;
+    const phonesText = (m.phones ?? []).join(" ").toLowerCase();
+    const notesText = (m.notes ?? "").toLowerCase();
+    return m.name.toLowerCase().includes(q) || phonesText.includes(q) || notesText.includes(q);
+  });
 
   useEffect(() => {
     const end = new Date();
@@ -179,6 +197,46 @@ export function ReportsAnalytics() {
     if (format === "csv") exportToCSV(data, "تقرير الحضور");
   };
 
+  const handleExtractNonDeacons = async () => {
+    setNonDeaconsLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from("members")
+        .select("id, name, phones, notes, deacon_rank")
+        .eq("deacon_rank", "not_deacon")
+        .order("name", { ascending: true });
+
+      if (error) throw error;
+
+      setNonDeacons(
+        (data || []).map((m: any) => ({
+          id: m.id as string,
+          name: m.name as string,
+          phones: (m.phones as string[] | null) ?? null,
+          notes: (m.notes as string | null) ?? null,
+        })),
+      );
+    } catch (err) {
+      console.error("Error extracting non-deacons:", err);
+    } finally {
+      setNonDeaconsLoading(false);
+    }
+  };
+
+  const handleExportNonDeacons = async (format: "pdf" | "excel") => {
+    if (nonDeacons.length === 0) return;
+
+    const data = nonDeacons.map((m) => ({
+      الاسم: m.name,
+      "أرقام التليفون": (m.phones ?? []).length ? (m.phones ?? []).join(", ") : "-",
+      الملاحظات: m.notes ?? "-",
+    }));
+
+    const title = "أسماء الشمامسة غير المرشومين بالمستوي الثاني رابعة وخامسة وسادسة ابتدائي";
+    if (format === "pdf") exportToPDF(data, title);
+    if (format === "excel") exportToExcel(data, title);
+  };
+
   return (
     <div className="space-y-6 md:space-y-8 pb-8 w-full" dir="rtl">
       <AnalyticsHeader
@@ -268,6 +326,99 @@ export function ReportsAnalytics() {
           {/* Future Implementation */}
         </TabsContent>
       </Tabs>
+
+      <Card className="border-none shadow-sm bg-white text-right">
+        <CardHeader className="pt-5 pb-4 border-b border-gray-50">
+          <div className="flex items-start justify-between gap-4 flex-col md:flex-row">
+            <div className="space-y-1">
+              <CardTitle className="text-lg md:text-xl font-bold">
+                أسماء الشمامسة غير المرشومين بالمستوي الثاني رابعة وخامسة وسادسة ابتدائي
+              </CardTitle>
+              <CardDescription>
+                استخراج وعرض كل الطلاب “مش شماس” ثم تصدير PDF أو Excel.
+              </CardDescription>
+            </div>
+
+            <div className="flex items-center gap-2 flex-wrap">
+              <Button
+                onClick={handleExtractNonDeacons}
+                disabled={nonDeaconsLoading}
+                className="h-10"
+              >
+                {nonDeaconsLoading ? "جاري الاستخراج..." : "استخراج"}
+              </Button>
+
+              <Button
+                variant="outline"
+                onClick={() => handleExportNonDeacons("excel")}
+                disabled={nonDeacons.length === 0}
+                className="h-10"
+              >
+                <FileSpreadsheet className="h-4 w-4 ml-2" />
+                Excel
+              </Button>
+
+              <Button
+                variant="outline"
+                onClick={() => handleExportNonDeacons("pdf")}
+                disabled={nonDeacons.length === 0}
+                className="h-10"
+              >
+                <FileText className="h-4 w-4 ml-2" />
+                PDF
+              </Button>
+            </div>
+          </div>
+        </CardHeader>
+
+        <CardContent className="pt-4">
+          <div className="flex items-center justify-between gap-4 flex-col sm:flex-row mb-4">
+            <div className="text-sm text-gray-500">
+              {nonDeaconsLoading ? "..." : `${nonDeaconsFiltered.length} طالب`}
+            </div>
+
+            <div className="w-full sm:w-72">
+              <Input
+                placeholder="بحث بالاسم أو الهاتف أو الملاحظات..."
+                value={nonDeaconsSearch}
+                onChange={(e) => setNonDeaconsSearch(e.target.value)}
+                className="bg-gray-50"
+              />
+            </div>
+          </div>
+
+          {nonDeaconsLoading ? (
+            <div className="py-10 text-center text-gray-500">جاري التحميل...</div>
+          ) : nonDeaconsFiltered.length === 0 ? (
+            <div className="py-10 text-center text-gray-500">
+              لا توجد بيانات بعد. اضغط زر “استخراج”.
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader className="bg-gradient-to-l from-indigo-50 to-blue-50">
+                  <TableRow>
+                    <TableHead className="text-right whitespace-nowrap">الاسم</TableHead>
+                    <TableHead className="text-right whitespace-nowrap">أرقام التليفون</TableHead>
+                    <TableHead className="text-right whitespace-nowrap">الملاحظات</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {nonDeaconsFiltered.map((m) => (
+                    <TableRow key={m.id} className="hover:bg-slate-50 transition-colors">
+                      <TableCell className="font-medium">{m.name}</TableCell>
+                      <TableCell className="text-gray-600">
+                        {(m.phones ?? []).length ? (m.phones ?? []).join(", ") : "-"}
+                      </TableCell>
+                      <TableCell className="text-gray-600">{m.notes ?? "-"}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

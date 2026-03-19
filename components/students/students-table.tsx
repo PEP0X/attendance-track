@@ -42,7 +42,8 @@ interface StudentsTableProps {
 }
 
 function formatRankLabel(rank: DeaconRank | null) {
-  if (!rank || rank === "not_deacon") return "مش شماس"
+  if (rank === null) return "غير محدد"
+  if (rank === "not_deacon") return "مش شماس"
   switch (rank) {
     case "absalts":
       return "أبصلتس"
@@ -54,7 +55,10 @@ function formatRankLabel(rank: DeaconRank | null) {
 }
 
 function rankBadgeClass(rank: DeaconRank | null) {
-  if (!rank || rank === "not_deacon") {
+  if (rank === null) {
+    return "bg-gray-50 text-gray-500 border-gray-200"
+  }
+  if (rank === "not_deacon") {
     return "bg-gray-100 text-gray-700 border-gray-200"
   }
   if (rank === "absalts") {
@@ -171,19 +175,20 @@ export function StudentsTable({ rows, onEdit, onDelete, onRankChange }: Students
         header: () => <span className="whitespace-nowrap">الرتبة الشماسية</span>,
         cell: ({ row }) => {
           const member = row.original.member
-          const rank = member.deacon_rank ?? "not_deacon"
+          const rank = member.deacon_rank
           return (
             <div className="flex items-center">
               <button
                 type="button"
                 onClick={() => {
-                  const next: DeaconRank =
-                    rank === "not_deacon"
-                      ? "absalts"
-                      : rank === "absalts"
-                        ? "agnostis"
-                        : "not_deacon"
-                  onRankChange(member.id, next === "not_deacon" ? null : next)
+                  // Cycle: null -> absalts -> agnostis -> null
+                  // (If DB already contains "not_deacon", treat it like null for cycling)
+                  let next: DeaconRank | null
+                  if (rank === null || rank === "not_deacon") next = "absalts"
+                  else if (rank === "absalts") next = "agnostis"
+                  else next = null // rank === "agnostis"
+
+                  onRankChange(member.id, next)
                 }}
                 className="focus:outline-none"
               >

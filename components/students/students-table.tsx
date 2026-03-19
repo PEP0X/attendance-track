@@ -182,9 +182,11 @@ export function StudentsTable({ rows, onEdit, onDelete, onRankChange }: Students
                 type="button"
                 onClick={() => {
                   // Cycle: null -> absalts -> agnostis -> null
-                  // (If DB already contains "not_deacon", treat it like null for cycling)
+                  // Order:
+                  // null (غير محدد) -> not_deacon (مش شماس) -> absalts (أبصلتس) -> agnostis (أغنسطس) -> null
                   let next: DeaconRank | null
-                  if (rank === null || rank === "not_deacon") next = "absalts"
+                  if (rank === null) next = "not_deacon"
+                  else if (rank === "not_deacon") next = "absalts"
                   else if (rank === "absalts") next = "agnostis"
                   else next = null // rank === "agnostis"
 
